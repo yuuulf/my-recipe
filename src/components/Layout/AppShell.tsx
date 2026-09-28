@@ -33,8 +33,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Soup size={21} strokeWidth={2.4} />
           </div>
           <div>
-            <strong>KITCHEN NOTE</strong>
-            <span>みんなのレシピ帳</span>
+            <strong>MY RECIPE</strong>
+            <span>私のレシピ帳</span>
           </div>
         </div>
 
@@ -99,7 +99,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="brand-mark" aria-hidden="true">
               <Soup size={19} />
             </div>
-            <strong>KITCHEN NOTE</strong>
+            <strong>MY RECIPE</strong>
           </div>
           <NavLink to="/settings" className="icon-button" aria-label="設定">
             <Settings size={19} />

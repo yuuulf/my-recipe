@@ -44,7 +44,7 @@ export function LoginPage() {
         <div className="showcase-topline">
           <div className="brand-lockup light compact">
             <div className="brand-mark"><Soup size={20} /></div>
-            <strong>KITCHEN NOTE</strong>
+            <strong>MY RECIPE</strong>
           </div>
           <span className="showcase-badge">YOUR SHARED RECIPE BOOK</span>
         </div>
@@ -73,7 +73,7 @@ export function LoginPage() {
         <div className="login-panel-inner">
           <div className="mobile-login-brand brand-lockup compact">
             <div className="brand-mark"><Soup size={19} /></div>
-            <strong>KITCHEN NOTE</strong>
+            <strong>MY RECIPE</strong>
           </div>
           <div className="login-heading">
             <span className="eyebrow">WELCOME BACK</span>
@@ -107,7 +107,7 @@ export function LoginPage() {
           <p className="login-signup-copy">ログイン後に、あなたのレシピ帳を作成できます。</p>
           <Link to="/recipes" className="demo-link">デモのレシピを見る <ArrowRight size={15} /></Link>
         </div>
-        <div className="login-panel-bottom">© {new Date().getFullYear()} Kitchen Note</div>
+        <div className="login-panel-bottom">My Recipe</div>
       </div>
     </div>
   )

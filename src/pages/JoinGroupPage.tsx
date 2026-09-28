@@ -51,7 +51,7 @@ export function JoinGroupPage() {
 
   return (
     <div className="join-page">
-      <div className="join-brand brand-lockup compact"><div className="brand-mark"><Soup size={19} /></div><strong>KITCHEN NOTE</strong></div>
+      <div className="join-brand brand-lockup compact"><div className="brand-mark"><Soup size={19} /></div><strong>MY RECIPE</strong></div>
       <div className="join-card">
         <div className="join-card-art"><div className="join-art-circle"><UsersRound size={28} /></div><span className="join-art-line line-one" /><span className="join-art-line line-two" /></div>
         {loading ? <div className="join-loading"><LoaderCircle className="spin" size={26} /><p>招待リンクを確認しています…</p></div> : null}

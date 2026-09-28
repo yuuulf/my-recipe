@@ -1,4 +1,4 @@
-# Kitchen Note
+# My Recipe
 
 家族や友人と一緒に使える、料理レシピ管理Webアプリです。React + TypeScript + Vite をフロントエンドに採用し、Supabase接続時はAuth・PostgreSQL・RLS・RPCを利用します。
 
