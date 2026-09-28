@@ -1,34 +1,30 @@
-# my-recipe
+# Kitchen Note
 
-React + TypeScript + Vite のプロジェクトです。
+家族や友人と一緒に使える、料理レシピ管理Webアプリです。React + TypeScript + Vite をフロントエンドに採用し、Supabase接続時はAuth・PostgreSQL・RLS・RPCを利用します。
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## ローカルで確認する
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Supabaseの環境変数がない場合はローカルプレビューモードで起動します。サンプルレシピの閲覧、検索、登録、編集、削除、招待リンクの画面を確認できます。データはブラウザのlocalStorageに保存されます。
+
+## Supabaseを接続する
+
+`.env.local` を作成し、以下を設定します。
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+```
+
+Supabase SQL EditorまたはSupabase CLIで [`supabase/migrations/20260928000000_initial_schema.sql`](supabase/migrations/20260928000000_initial_schema.sql) を実行してください。Magic Link認証のRedirect URLには、開発URL（例：`http://localhost:5173/recipes`）と本番URLを登録します。
+
+## コマンド
+
+```bash
+npm run build
+npm run lint
+```
