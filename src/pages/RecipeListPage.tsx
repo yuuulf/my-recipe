@@ -1,4 +1,4 @@
-import { Plus, Sparkles, UtensilsCrossed } from 'lucide-react'
+import { Plus, UtensilsCrossed } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/Button'
@@ -55,15 +55,15 @@ export function RecipeListPage() {
     return Array.from(new Set([...tagFilters, ...discovered])).slice(0, 10)
   }, [recipes])
 
-  const recentLabel = query || selectedTag !== 'すべて' ? '検索結果' : '最近更新したレシピ'
+  const recentLabel = query || selectedTag !== 'すべて' ? '検索結果' : 'すべてのレシピ'
 
   return (
     <AppShell>
       <div className="page-header recipe-list-header">
         <div>
-          <span className="eyebrow">{group?.name ?? 'MY NOTEBOOK'}</span>
-          <h1>今日のレシピ</h1>
-          <p>作りたい料理をすぐに見つけて、いつもの味を再現しましょう。</p>
+          <span className="eyebrow">{group?.name ?? 'レシピ帳'}</span>
+          <h1>レシピ一覧</h1>
+          <p>いつものごはんを、もっとおいしく、もっと楽しく。</p>
         </div>
         <Link to="/recipes/new" className="button button-primary header-add-button"><Plus size={18} /> レシピを追加</Link>
       </div>
@@ -78,7 +78,7 @@ export function RecipeListPage() {
               className={`filter-chip ${selectedTag === tag ? 'selected' : ''}`}
               onClick={() => setSelectedTag(tag)}
             >
-              {tag === 'すべて' ? 'すべての料理' : `#${tag}`}
+              {tag === 'すべて' ? 'すべて' : tag}
             </button>
           ))}
         </div>
@@ -89,7 +89,6 @@ export function RecipeListPage() {
           <h2>{recentLabel}</h2>
           {!loading ? <span>{filteredRecipes.length}件</span> : null}
         </div>
-        <span className="list-heading-accent"><Sparkles size={15} /> 料理の時間を楽しもう</span>
       </div>
 
       {error ? <div className="alert error" role="alert">{error}</div> : null}

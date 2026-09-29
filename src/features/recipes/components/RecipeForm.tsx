@@ -108,7 +108,6 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
       <section className="form-section intro-section">
         <div className="section-marker"><BookOpen size={17} /></div>
         <div className="section-body">
-          <span className="eyebrow">NEW RECIPE</span>
           <h1>料理の記録を残す</h1>
           <p className="section-description">あとから作りたくなるように、気軽にメモしておきましょう。</p>
           <label className="field-label required">料理名</label>
@@ -122,7 +121,6 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
       <section className="form-section">
         <div className="section-marker orange"><FileText size={17} /></div>
         <div className="section-body">
-          <span className="eyebrow">INGREDIENTS</span>
           <h2>材料</h2>
           <p className="section-description">1行に1つずつ入力してください。</p>
           <IngredientEditor
@@ -138,7 +136,6 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
       <section className="form-section">
         <div className="section-marker green"><NotebookPen size={17} /></div>
         <div className="section-body">
-          <span className="eyebrow">METHOD</span>
           <h2>作り方</h2>
           <p className="section-description">順番に並べると、料理中にも見返しやすくなります。</p>
           <StepEditor
@@ -154,7 +151,6 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
       <section className="form-section">
         <div className="section-marker blue"><Clock3 size={17} /></div>
         <div className="section-body">
-          <span className="eyebrow">DETAILS</span>
           <h2>料理のメモ</h2>
           <div className="two-column-fields">
             <label className="field-label">調理時間 <span>分</span>

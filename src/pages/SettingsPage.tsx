@@ -31,7 +31,7 @@ export function SettingsPage() {
     <AppShell>
       <div className="page-header settings-header">
         <div>
-          <span className="eyebrow">WORKSPACE SETTINGS</span>
+          <span className="eyebrow">設定</span>
           <h1>グループ設定</h1>
           <p>レシピ帳を一緒に使うメンバーを管理します。</p>
         </div>
@@ -39,7 +39,7 @@ export function SettingsPage() {
 
       <div className="settings-grid">
         <section className="settings-card group-card">
-          <div className="settings-card-heading"><div className="settings-card-icon orange"><UsersRound size={19} /></div><div><span className="eyebrow">YOUR NOTEBOOK</span><h2>{group?.name}</h2></div></div>
+          <div className="settings-card-heading"><div className="settings-card-icon orange"><UsersRound size={19} /></div><div><span className="eyebrow">グループ情報</span><h2>{group?.name}</h2></div></div>
           <div className="group-card-divider" />
           <div className="group-detail-row"><span>オーナー</span><strong>{members.find((member) => member.role === 'owner') ? getMemberDisplayName(members.find((member) => member.role === 'owner')!, user) : user?.displayName}</strong></div>
           <div className="group-detail-row"><span>メンバー数</span><strong>{members.length}人</strong></div>
@@ -47,7 +47,7 @@ export function SettingsPage() {
         </section>
 
         <section className="settings-card members-card">
-          <div className="settings-card-heading"><div className="settings-card-icon blue"><UserRound size={19} /></div><div><span className="eyebrow">PEOPLE</span><h2>メンバー</h2></div><span className="member-count">{members.length}</span></div>
+          <div className="settings-card-heading"><div className="settings-card-icon blue"><UserRound size={19} /></div><div><span className="eyebrow">参加者</span><h2>メンバー</h2></div><span className="member-count">{members.length}</span></div>
           <div className="member-list">
             {members.map((member) => (
               <div className="member-row" key={`${member.group_id}-${member.user_id}`}>
@@ -60,7 +60,7 @@ export function SettingsPage() {
         </section>
 
         <section className="settings-card invite-card">
-          <div className="settings-card-heading"><div className="settings-card-icon green"><Link2 size={19} /></div><div><span className="eyebrow">INVITE PEOPLE</span><h2>メンバーを招待</h2></div></div>
+          <div className="settings-card-heading"><div className="settings-card-icon green"><Link2 size={19} /></div><div><span className="eyebrow">招待</span><h2>メンバーを招待</h2></div></div>
           <p>このリンクを知っている人は、ログイン後にレシピ帳へ参加できます。</p>
           <div className="invite-link-box"><Link2 size={16} /><span>{inviteUrl}</span></div>
           <Button variant="secondary" className="copy-button" onClick={() => void copyInviteLink()}>{copied ? <><Check size={16} /> コピーしました</> : <><Copy size={16} /> 招待リンクをコピー</>}</Button>
@@ -68,7 +68,7 @@ export function SettingsPage() {
       </div>
 
       <section className="settings-danger-zone">
-        <div><span className="eyebrow">ACCOUNT</span><h2>アカウント</h2><p>{user?.email}</p></div>
+        <div><span className="eyebrow">アカウント</span><h2>アカウント</h2><p>{user?.email}</p></div>
         <Button variant="ghost" onClick={() => void handleSignOut()}><LogOut size={16} /> ログアウト</Button>
       </section>
     </AppShell>

@@ -86,7 +86,7 @@ export function RecipeDetailPage() {
           </div>
           <header className="detail-hero">
             <div className="detail-hero-copy">
-              <span className="eyebrow">FAMILY RECIPE · {formatDate(recipe.updated_at)}</span>
+              <span className="eyebrow">最終更新 {formatDate(recipe.updated_at)}</span>
               <h1>{recipe.title}</h1>
               {recipe.description ? <p>{recipe.description}</p> : null}
               <div className="detail-meta-row">
@@ -101,20 +101,20 @@ export function RecipeDetailPage() {
 
           <div className="detail-content-grid">
             <section className="detail-section ingredients-section">
-              <div className="detail-section-heading"><span className="section-number">01</span><div><span className="eyebrow">WHAT YOU NEED</span><h2>材料</h2></div></div>
+              <div className="detail-section-heading"><span className="section-number">01</span><div><h2>材料</h2></div></div>
               {recipe.ingredients.length ? <ul className="ingredient-list">{recipe.ingredients.map((ingredient, index) => <li key={`${ingredient}-${index}`}><span className="check-circle" /> <span>{ingredient}</span></li>)}</ul> : <p className="muted-copy">材料の記録はありません。</p>}
             </section>
 
             <section className="detail-section steps-section">
-              <div className="detail-section-heading"><span className="section-number">02</span><div><span className="eyebrow">HOW TO MAKE</span><h2>作り方</h2></div></div>
+              <div className="detail-section-heading"><span className="section-number">02</span><div><h2>作り方</h2></div></div>
               {recipe.steps.length ? <ol className="steps-list">{recipe.steps.map((step, index) => <li key={`${step}-${index}`}><span className="step-list-number">{String(index + 1).padStart(2, '0')}</span><p>{step}</p></li>)}</ol> : <p className="muted-copy">作り方の記録はありません。</p>}
             </section>
           </div>
 
           {(recipe.memo || recipe.source_url) ? (
             <div className="detail-notes-grid">
-              {recipe.memo ? <section className="note-card memo-card"><div className="note-card-heading"><NotebookPen size={17} /><span>MEMO</span></div><p>{recipe.memo}</p></section> : null}
-              {recipe.source_url ? <section className="note-card source-card"><div className="note-card-heading"><ExternalLink size={17} /><span>SOURCE</span></div><a href={recipe.source_url} target="_blank" rel="noreferrer">{recipe.source_url}<ExternalLink size={14} /></a></section> : null}
+              {recipe.memo ? <section className="note-card memo-card"><div className="note-card-heading"><NotebookPen size={17} /><span>メモ</span></div><p>{recipe.memo}</p></section> : null}
+              {recipe.source_url ? <section className="note-card source-card"><div className="note-card-heading"><ExternalLink size={17} /><span>参考URL</span></div><a href={recipe.source_url} target="_blank" rel="noreferrer">{recipe.source_url}<ExternalLink size={14} /></a></section> : null}
             </div>
           ) : null}
 

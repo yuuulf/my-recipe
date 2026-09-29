@@ -1,6 +1,5 @@
 import {
   BookOpen,
-  ChevronDown,
   CircleUserRound,
   LogOut,
   Plus,
@@ -33,17 +32,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Soup size={21} strokeWidth={2.4} />
           </div>
           <div>
-            <strong>MY RECIPE</strong>
-            <span>私のレシピ帳</span>
+            <strong>My Recipe</strong>
+            <span>レシピ管理</span>
           </div>
         </div>
 
         <div className="group-switcher">
-          <span className="eyebrow">CURRENT NOTEBOOK</span>
+          <span className="eyebrow">選択中のノート</span>
           <div className="group-switcher-name">
             <span className="group-avatar">{group?.name.slice(0, 1) ?? '？'}</span>
             <span>{group?.name ?? 'グループ未設定'}</span>
-            <ChevronDown size={15} aria-hidden="true" />
           </div>
         </div>
 
@@ -99,7 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="brand-mark" aria-hidden="true">
               <Soup size={19} />
             </div>
-            <strong>MY RECIPE</strong>
+            <strong>My Recipe</strong>
           </div>
           <NavLink to="/settings" className="icon-button" aria-label="設定">
             <Settings size={19} />
