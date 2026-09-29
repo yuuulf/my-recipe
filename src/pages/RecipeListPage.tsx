@@ -14,7 +14,7 @@ import type { Recipe } from '../types/database'
 const tagFilters = ['すべて', '肉', '魚', '野菜', '麺', '簡単']
 
 export function RecipeListPage() {
-  const { group } = useApp()
+  const { group, isDemoUser } = useApp()
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [query, setQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState('すべて')
@@ -27,7 +27,7 @@ export function RecipeListPage() {
     const timer = window.setTimeout(() => {
       setLoading(true)
       setError('')
-      void getRecipes(group.id, query)
+      void getRecipes(group.id, query, isDemoUser)
         .then((data) => {
           if (active) setRecipes(data)
         })
@@ -43,7 +43,7 @@ export function RecipeListPage() {
       active = false
       window.clearTimeout(timer)
     }
-  }, [group, query])
+  }, [group, isDemoUser, query])
 
   const filteredRecipes = useMemo(() => {
     if (selectedTag === 'すべて') return recipes

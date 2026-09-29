@@ -8,9 +8,10 @@ type EditorProps = {
   onAppend: () => void
   onRemove: (index: number) => void
   error?: string
+  disabled?: boolean
 }
 
-export function StepEditor({ values, register, onAppend, onRemove, error }: EditorProps) {
+export function StepEditor({ values, register, onAppend, onRemove, error, disabled = false }: EditorProps) {
   return (
     <div className="editor-list">
       {values.map((_value, index) => (
@@ -19,6 +20,7 @@ export function StepEditor({ values, register, onAppend, onRemove, error }: Edit
           <span className="step-number">{index + 1}</span>
           <textarea
             className="text-input step-input"
+            disabled={disabled}
             rows={2}
             placeholder={index === 0 ? '例：玉ねぎを薄切りにする' : '手順を入力'}
             {...register(`steps.${index}`)}
@@ -26,6 +28,7 @@ export function StepEditor({ values, register, onAppend, onRemove, error }: Edit
           <button
             type="button"
             className="remove-button"
+            disabled={disabled}
             onClick={() => onRemove(index)}
             aria-label={`手順${index + 1}を削除`}
           >
@@ -33,7 +36,7 @@ export function StepEditor({ values, register, onAppend, onRemove, error }: Edit
           </button>
         </div>
       ))}
-      <button type="button" className="add-row-button" onClick={onAppend}>
+      <button type="button" className="add-row-button" disabled={disabled} onClick={onAppend}>
         <Plus size={16} /> 手順を追加
       </button>
       {error ? <span className="field-error">{error}</span> : null}

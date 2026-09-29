@@ -6,10 +6,14 @@ import { AppShell } from '../components/Layout/AppShell'
 import { getMemberDisplayName, useApp } from '../contexts/app-context'
 
 export function SettingsPage() {
-  const { group, members, signOut, user, isDemoMode } = useApp()
+  const { group, members, signOut, user, isDemoMode, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
-  const inviteUrl = group ? `${window.location.origin}/join/${group.invite_token}` : ''
+  const inviteUrl = isDemoUser
+    ? `${window.location.origin}/login`
+    : group
+      ? `${window.location.origin}/join/${group.invite_token}`
+      : ''
 
   const copyInviteLink = async () => {
     if (!inviteUrl) return
@@ -43,7 +47,8 @@ export function SettingsPage() {
           <div className="group-card-divider" />
           <div className="group-detail-row"><span>オーナー</span><strong>{members.find((member) => member.role === 'owner') ? getMemberDisplayName(members.find((member) => member.role === 'owner')!, user) : user?.displayName}</strong></div>
           <div className="group-detail-row"><span>メンバー数</span><strong>{members.length}人</strong></div>
-          {isDemoMode ? <p className="settings-footnote"><ShieldCheck size={14} /> ローカルプレビューのデータはこのブラウザに保存されます。</p> : null}
+          {isDemoUser ? <p className="settings-footnote"><ShieldCheck size={14} /> デモ用の固定データを表示しています。</p> : null}
+          {!isDemoUser && isDemoMode ? <p className="settings-footnote"><ShieldCheck size={14} /> ローカルプレビューのデータはこのブラウザに保存されます。</p> : null}
         </section>
 
         <section className="settings-card members-card">
@@ -61,8 +66,12 @@ export function SettingsPage() {
 
         <section className="settings-card invite-card">
           <div className="settings-card-heading"><div className="settings-card-icon green"><Link2 size={19} /></div><div><span className="eyebrow">招待</span><h2>メンバーを招待</h2></div></div>
-          <p>このリンクを知っている人は、ログイン後にレシピ帳へ参加できます。</p>
-          <div className="invite-link-box"><Link2 size={16} /><span>{inviteUrl}</span></div>
+          <p>{isDemoUser ? 'デモでは、メンバー招待のリンクからログイン画面を案内します。' : 'このリンクを知っている人は、ログイン後にレシピ帳へ参加できます。'}</p>
+          {isDemoUser ? (
+            <a href={inviteUrl} className="invite-link-box"><Link2 size={16} /><span>{inviteUrl}</span></a>
+          ) : (
+            <div className="invite-link-box"><Link2 size={16} /><span>{inviteUrl}</span></div>
+          )}
           <Button variant="secondary" className="copy-button" onClick={() => void copyInviteLink()}>{copied ? <><Check size={16} /> コピーしました</> : <><Copy size={16} /> 招待リンクをコピー</>}</Button>
         </section>
       </div>

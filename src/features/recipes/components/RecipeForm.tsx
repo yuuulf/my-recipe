@@ -41,9 +41,10 @@ type RecipeFormProps = {
   defaultValues?: RecipeFormValues
   submitLabel: string
   onSubmit: (values: RecipeFormValues) => Promise<void>
+  disableSave?: boolean
 }
 
-export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormProps) {
+export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave = false }: RecipeFormProps) {
   const [submitError, setSubmitError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const { register, handleSubmit, watch, setValue, reset, formState: { errors, isDirty } } = useForm<RecipeFormValues>({
@@ -59,7 +60,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
   }, [defaultValues, reset])
 
   useEffect(() => {
-    if (!isDirty) return
+    if (!isDirty || disableSave) return
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault()
@@ -68,9 +69,10 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [isDirty])
+  }, [disableSave, isDirty])
 
   const submit = async (values: RecipeFormValues) => {
+    if (disableSave) return
     setSubmitError('')
     setIsSaving(true)
     try {
@@ -100,9 +102,10 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
     <form className="recipe-form" onSubmit={(event) => void handleSubmit(submit)(event)}>
       <div className="form-topbar">
         <Link to="/recipes" className="back-link"><ArrowLeft size={17} /> 一覧に戻る</Link>
-        <Button type="submit" loading={isSaving}>{submitLabel}</Button>
+        <Button type="submit" loading={isSaving} disabled={disableSave}>{submitLabel}</Button>
       </div>
 
+      {disableSave ? <div className="demo-readonly-banner" role="note">デモモードではレシピを閲覧・編集できますが、変更は保存できません。</div> : null}
       {submitError ? <div className="alert error" role="alert">{submitError}</div> : null}
 
       <section className="form-section intro-section">
@@ -174,7 +177,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
 
       <div className="form-bottom-actions">
         <Link to="/recipes" className="button button-ghost">キャンセル</Link>
-        <Button type="submit" loading={isSaving}>{submitLabel}</Button>
+        <Button type="submit" loading={isSaving} disabled={disableSave}>{submitLabel}</Button>
       </div>
     </form>
   )

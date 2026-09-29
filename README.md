@@ -22,6 +22,12 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 
 Supabase SQL EditorまたはSupabase CLIで [`supabase/migrations/20260928000000_initial_schema.sql`](supabase/migrations/20260928000000_initial_schema.sql) を実行してください。Magic Link認証のRedirect URLには、開発URL（例：`http://localhost:5173/recipes`）と本番URLを登録します。
 
+## デモ
+
+ログイン画面の「デモのレシピを見る」から、Supabaseの認証状態に依存しない固定データのデモを開けます。デモユーザーのメールアドレスは `demonstration@example.com` です。
+
+デモではレシピの追加・編集画面を表示できますが、「レシピを保存」「変更を保存」は無効です。削除操作は表示せず、グループ設定とメンバー情報も固定表示で、メンバー招待リンクはログイン画面を指します。
+
 ## コマンド
 
 ```bash

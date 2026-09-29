@@ -10,7 +10,7 @@ import type { RecipeFormValues } from '../types/database'
 
 export function RecipeEditPage() {
   const { id } = useParams<{ id: string }>()
-  const { group, user } = useApp()
+  const { group, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [values, setValues] = useState<RecipeFormValues | null>(null)
   const [loading, setLoading] = useState(true)
@@ -19,7 +19,7 @@ export function RecipeEditPage() {
   useEffect(() => {
     if (!id) return
     let active = true
-    void getRecipe(id)
+    void getRecipe(id, isDemoUser)
       .then((recipe) => {
         if (!active) return
         if (!recipe || (group && recipe.group_id !== group.id)) {
@@ -31,7 +31,7 @@ export function RecipeEditPage() {
       .catch((loadError: unknown) => { if (active) setError(getErrorMessage(loadError, 'レシピを読み込めませんでした。')) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [group, id])
+  }, [group, id, isDemoUser])
 
   return (
     <AppShell>
@@ -41,9 +41,11 @@ export function RecipeEditPage() {
         <RecipeForm
           defaultValues={values}
           submitLabel="変更を保存"
+          disableSave={isDemoUser}
           onSubmit={async (nextValues) => {
+            if (isDemoUser) throw new Error('デモユーザーはレシピを変更できません。')
             if (!user) throw new Error('ログインが必要です。')
-            await updateRecipe(id, nextValues, user.id)
+            await updateRecipe(id, nextValues, user.id, isDemoUser)
             navigate(`/recipes/${id}`)
           }}
         />

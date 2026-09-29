@@ -13,6 +13,8 @@ export type AppContextValue = {
   authReady: boolean
   groupLoading: boolean
   isDemoMode: boolean
+  isDemoUser: boolean
+  enterDemo: () => void
   signIn: (email: string, redirectPath?: string) => Promise<AuthResult>
   signOut: () => Promise<void>
   createGroup: (name: string) => Promise<Group>

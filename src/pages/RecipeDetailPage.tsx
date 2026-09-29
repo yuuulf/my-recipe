@@ -17,7 +17,7 @@ const formatDate = (value: string) => new Intl.DateTimeFormat('ja-JP', {
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { group, user } = useApp()
+  const { group, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,7 +29,7 @@ export function RecipeDetailPage() {
     if (!id) return
     let active = true
     setLoading(true)
-    void getRecipe(id)
+    void getRecipe(id, isDemoUser)
       .then((data) => {
         if (!active) return
         if (data && group && data.group_id !== group.id) {
@@ -45,13 +45,13 @@ export function RecipeDetailPage() {
         if (active) setLoading(false)
       })
     return () => { active = false }
-  }, [group, id])
+  }, [group, id, isDemoUser])
 
   const handleDelete = async () => {
     if (!id) return
     setDeleting(true)
     try {
-      await deleteRecipe(id)
+      await deleteRecipe(id, isDemoUser)
       navigate('/recipes', { replace: true })
     } catch (deleteError) {
       setError(getErrorMessage(deleteError, '削除できませんでした。'))
@@ -80,8 +80,8 @@ export function RecipeDetailPage() {
             <Link to="/recipes" className="back-link"><ArrowLeft size={17} /> レシピ一覧</Link>
             <div className="detail-actions">
               <Link to={`/recipes/${recipe.id}/edit`} className="button button-secondary"><Edit3 size={16} /> 編集</Link>
-              <button type="button" className="icon-button danger-icon" onClick={() => setShowDeleteConfirm(true)} aria-label="レシピを削除" title="削除"><Trash2 size={17} /></button>
-              <button type="button" className="icon-button more-button" aria-label="その他の操作"><MoreHorizontal size={18} /></button>
+              {!isDemoUser ? <button type="button" className="icon-button danger-icon" onClick={() => setShowDeleteConfirm(true)} aria-label="レシピを削除" title="削除"><Trash2 size={17} /></button> : null}
+              {!isDemoUser ? <button type="button" className="icon-button more-button" aria-label="その他の操作"><MoreHorizontal size={18} /></button> : null}
             </div>
           </div>
           <header className="detail-hero">

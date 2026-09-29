@@ -5,6 +5,10 @@ import {
   localGetRecipes,
   localUpdateRecipe,
 } from '../../../lib/localStorage'
+import {
+  getDemoRecipe,
+  getDemoRecipes,
+} from '../../../lib/demoData'
 import { supabase } from '../../../lib/supabase'
 import type { Recipe, RecipeFormValues } from '../../../types/database'
 
@@ -40,7 +44,8 @@ export const recipeToFormValues = (recipe: Recipe): RecipeFormValues => ({
   memo: recipe.memo ?? '',
 })
 
-export const getRecipes = async (groupId: string, query = ''): Promise<Recipe[]> => {
+export const getRecipes = async (groupId: string, query = '', isDemoUser = false): Promise<Recipe[]> => {
+  if (isDemoUser) return getDemoRecipes(query)
   if (!supabase) return localGetRecipes(groupId, query)
 
   if (query.trim()) {
@@ -61,7 +66,8 @@ export const getRecipes = async (groupId: string, query = ''): Promise<Recipe[]>
   return (data ?? []) as Recipe[]
 }
 
-export const getRecipe = async (id: string): Promise<Recipe | null> => {
+export const getRecipe = async (id: string, isDemoUser = false): Promise<Recipe | null> => {
+  if (isDemoUser) return getDemoRecipe(id)
   if (!supabase) return localGetRecipe(id)
   const { data, error } = await supabase
     .from('recipes')
@@ -76,7 +82,9 @@ export const createRecipe = async (
   values: RecipeFormValues,
   groupId: string,
   userId: string,
+  isDemoUser = false,
 ): Promise<Recipe> => {
+  if (isDemoUser) throw new Error('デモユーザーはレシピを保存できません。')
   const payload = formToPayload(values, groupId, userId)
   if (!supabase) {
     const createdAt = new Date().toISOString()
@@ -102,7 +110,9 @@ export const updateRecipe = async (
   id: string,
   values: RecipeFormValues,
   userId: string,
+  isDemoUser = false,
 ): Promise<Recipe> => {
+  if (isDemoUser) throw new Error('デモユーザーはレシピを変更できません。')
   const payload = formToPayload(values, '', userId)
   const updates = {
     title: payload.title,
@@ -128,7 +138,8 @@ export const updateRecipe = async (
   return data as Recipe
 }
 
-export const deleteRecipe = async (id: string): Promise<void> => {
+export const deleteRecipe = async (id: string, isDemoUser = false): Promise<void> => {
+  if (isDemoUser) throw new Error('デモユーザーはレシピを削除できません。')
   if (!supabase) {
     localDeleteRecipe(id)
     return

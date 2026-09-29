@@ -15,6 +15,14 @@ import {
   localSignIn,
   localSignOut,
 } from '../lib/localStorage'
+import {
+  clearDemoSession,
+  getDemoGroup,
+  getDemoMembers,
+  getDemoUser,
+  isDemoSessionActive,
+  startDemoSession,
+} from '../lib/demoData'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { AppContext, type AppContextValue, type AuthResult } from './app-context'
 import type { AppUser, Group, GroupMember } from '../types/database'
@@ -87,6 +95,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [members, setMembers] = useState<GroupMember[]>([])
   const [authReady, setAuthReady] = useState(false)
   const [groupLoading, setGroupLoading] = useState(false)
+  const [isDemoUser, setIsDemoUser] = useState(() => isDemoSessionActive())
 
   const loadGroup = useCallback(async (nextUser: AppUser | null) => {
     if (!nextUser) {
@@ -119,15 +128,33 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
   }, [])
 
+  const activateDemo = useCallback(() => {
+    startDemoSession()
+    setIsDemoUser(true)
+    setUser(getDemoUser())
+    setGroup(getDemoGroup())
+    setMembers(getDemoMembers())
+    setGroupLoading(false)
+    setAuthReady(true)
+  }, [])
+
   useEffect(() => {
     let mounted = true
 
     const bootLocal = () => {
       const localUser = getLocalUser()
       if (!mounted) return
+      setIsDemoUser(false)
       setUser(localUser)
       setAuthReady(true)
       void loadGroup(localUser)
+    }
+
+    if (isDemoSessionActive()) {
+      activateDemo()
+      return () => {
+        mounted = false
+      }
     }
 
     if (!supabase) {
@@ -138,15 +165,25 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
 
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isDemoSessionActive()) {
+        activateDemo()
+        return
+      }
       const nextUser = getSessionUser(session)
       if (!mounted) return
+      setIsDemoUser(false)
       setUser(nextUser)
       void loadGroup(nextUser)
     })
 
     void supabase.auth.getSession().then(({ data: sessionData }) => {
       if (!mounted) return
+      if (isDemoSessionActive()) {
+        activateDemo()
+        return
+      }
       const nextUser = getSessionUser(sessionData.session)
+      setIsDemoUser(false)
       setUser(nextUser)
       setAuthReady(true)
       void loadGroup(nextUser)
@@ -156,10 +193,13 @@ export function AppProvider({ children }: PropsWithChildren) {
       mounted = false
       data.subscription.unsubscribe()
     }
-  }, [loadGroup])
+  }, [activateDemo, loadGroup])
 
   const signIn = useCallback(async (email: string, redirectPath = '/recipes'): Promise<AuthResult> => {
     if (!email.trim()) throw new Error('メールアドレスを入力してください。')
+
+    clearDemoSession()
+    setIsDemoUser(false)
 
     if (!supabase) {
       const nextUser = localSignIn(email.trim())
@@ -185,6 +225,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     } else {
       localSignOut()
     }
+    clearDemoSession()
+    setIsDemoUser(false)
     setUser(null)
     setGroup(null)
     setMembers([])
@@ -192,6 +234,7 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const createGroup = useCallback(async (name: string) => {
     if (!user) throw new Error('ログインが必要です。')
+    if (isDemoUser) throw new Error('デモユーザーはグループを変更できません。')
     if (!name.trim()) throw new Error('グループ名を入力してください。')
 
     let nextGroup: Group
@@ -214,10 +257,11 @@ export function AppProvider({ children }: PropsWithChildren) {
       setMembers(await getSupabaseMembers(nextGroup.id))
     }
     return nextGroup
-  }, [loadGroup, user])
+  }, [isDemoUser, loadGroup, user])
 
   const joinGroup = useCallback(async (inviteToken: string) => {
     if (!user) throw new Error('ログインが必要です。')
+    if (isDemoUser) throw new Error('デモユーザーはグループを変更できません。')
     if (!inviteToken.trim()) throw new Error('招待リンクが不正です。')
 
     let nextGroup: Group
@@ -241,11 +285,16 @@ export function AppProvider({ children }: PropsWithChildren) {
       setMembers(await getSupabaseMembers(nextGroup.id))
     }
     return nextGroup
-  }, [loadGroup, user])
+  }, [isDemoUser, loadGroup, user])
 
   const refreshGroup = useCallback(async () => {
+    if (isDemoUser) {
+      setGroup(getDemoGroup())
+      setMembers(getDemoMembers())
+      return
+    }
     await loadGroup(user)
-  }, [loadGroup, user])
+  }, [isDemoUser, loadGroup, user])
 
   const value = useMemo<AppContextValue>(() => ({
     user,
@@ -254,6 +303,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     authReady,
     groupLoading,
     isDemoMode: !isSupabaseConfigured,
+    isDemoUser,
+    enterDemo: activateDemo,
     signIn,
     signOut,
     createGroup,
@@ -261,9 +312,11 @@ export function AppProvider({ children }: PropsWithChildren) {
     refreshGroup,
   }), [
     authReady,
+    activateDemo,
     createGroup,
     group,
     groupLoading,
+    isDemoUser,
     joinGroup,
     members,
     refreshGroup,

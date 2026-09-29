@@ -1,16 +1,18 @@
 import { ArrowRight, BookOpen, UsersRound } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 
 export function SetupPage() {
-  const { createGroup, user } = useApp()
+  const { createGroup, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [groupName, setGroupName] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  if (isDemoUser) return <Navigate to="/recipes" replace />
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()

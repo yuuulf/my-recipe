@@ -4,9 +4,10 @@ import { useState } from 'react'
 type TagInputProps = {
   tags: string[]
   onChange: (tags: string[]) => void
+  disabled?: boolean
 }
 
-export function TagInput({ tags, onChange }: TagInputProps) {
+export function TagInput({ tags, onChange, disabled = false }: TagInputProps) {
   const [value, setValue] = useState('')
 
   const addTag = () => {
@@ -25,7 +26,7 @@ export function TagInput({ tags, onChange }: TagInputProps) {
         {tags.map((tag) => (
           <span className="tag editable-tag" key={tag}>
             #{tag}
-            <button type="button" onClick={() => onChange(tags.filter((item) => item !== tag))} aria-label={`${tag}を削除`}>
+            <button type="button" disabled={disabled} onClick={() => onChange(tags.filter((item) => item !== tag))} aria-label={`${tag}を削除`}>
               <X size={13} />
             </button>
           </span>
@@ -34,6 +35,7 @@ export function TagInput({ tags, onChange }: TagInputProps) {
       <div className="tag-entry">
         <input
           className="text-input"
+          disabled={disabled}
           value={value}
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={(event) => {
@@ -44,7 +46,7 @@ export function TagInput({ tags, onChange }: TagInputProps) {
           }}
           placeholder="タグを入力してEnter"
         />
-        <button type="button" className="tag-add-button" onClick={addTag} aria-label="タグを追加">
+        <button type="button" className="tag-add-button" disabled={disabled} onClick={addTag} aria-label="タグを追加">
           <Plus size={16} />
         </button>
       </div>

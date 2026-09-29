@@ -6,7 +6,7 @@ import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 
 export function LoginPage() {
-  const { user, signIn, isDemoMode } = useApp()
+  const { user, signIn, isDemoMode, enterDemo } = useApp()
   const location = useLocation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -77,7 +77,13 @@ export function LoginPage() {
 
         <div className="login-divider"><span>はじめて使う方へ</span></div>
         <p className="login-signup-copy">ログイン後に、あなたのレシピ帳を作成できます。</p>
-        <Link to="/recipes" className="demo-link">デモのレシピを見る <ArrowRight size={15} /></Link>
+        <Link
+          to="/recipes?demo=1"
+          className="demo-link"
+          onClick={() => enterDemo()}
+        >
+          デモのレシピを見る <ArrowRight size={15} />
+        </Link>
       </main>
 
       <p className="login-footer">あなたの料理の記録を、もっと身近に。</p>

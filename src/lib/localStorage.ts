@@ -25,7 +25,7 @@ const createInitialState = (): LocalState => {
   const createdAt = now()
   const user: AppUser = {
     id: LOCAL_USER_ID,
-    email: 'demo@example.com',
+    email: 'demonstration@example.com',
     displayName: 'デモユーザー',
   }
   const group: Group = {

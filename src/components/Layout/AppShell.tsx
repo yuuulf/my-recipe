@@ -16,7 +16,7 @@ const navItems = [
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { group, user, signOut, isDemoMode } = useApp()
+  const { group, user, signOut, isDemoMode, isDemoUser } = useApp()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -64,10 +64,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </NavLink>
 
         <div className="sidebar-footer">
-          {isDemoMode ? (
+          {isDemoUser || isDemoMode ? (
             <div className="demo-note">
               <span className="status-dot" />
-              <span>ローカルプレビュー中</span>
+              <span>{isDemoUser ? 'デモ閲覧中' : 'ローカルプレビュー中'}</span>
             </div>
           ) : null}
           <div className="account-row">
