@@ -46,7 +46,7 @@ type RecipeFormProps = {
 export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormProps) {
   const [submitError, setSubmitError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<RecipeFormValues>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors, isDirty } } = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeSchema),
     defaultValues: defaultValues ?? fallbackValues,
   })
@@ -57,6 +57,18 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit }: RecipeFormP
   useEffect(() => {
     reset(defaultValues ?? fallbackValues)
   }, [defaultValues, reset])
+
+  useEffect(() => {
+    if (!isDirty) return
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [isDirty])
 
   const submit = async (values: RecipeFormValues) => {
     setSubmitError('')
