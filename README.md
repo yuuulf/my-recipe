@@ -4,10 +4,15 @@
 
 ## ローカルで確認する
 
+Node.jsはmiseで管理します。miseをインストールしたうえで、`mise.toml`で指定したNode.js 22を使用してください。
+
 ```bash
-npm install
-npm run dev
+mise install
+mise exec -- npm ci
+mise exec -- npm run dev
 ```
+
+シェルでmiseを有効化している場合は、`mise exec --`を省略できます。
 
 Supabaseの環境変数がない場合はローカルプレビューモードで起動します。サンプルレシピの閲覧、検索、登録、編集、削除、招待リンクの画面を確認できます。データはブラウザのlocalStorageに保存されます。
 

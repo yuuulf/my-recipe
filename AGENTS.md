@@ -14,7 +14,7 @@ My Recipe is a React 19, TypeScript, and Vite application for shared recipe mana
 
 ## Build, Test, and Development Commands
 
-Use the Node version in `.nvmrc` (`22.23.2`) and npm.
+Use mise to manage Node.js and npm. `mise.toml` specifies Node.js 22; run `mise install` to install the configured version. Run the commands below in a shell with mise activated, or prefix them with `mise exec --` (for example, `mise exec -- npm run build`). Keep Node.js version configuration in `mise.toml`.
 
 - `npm ci`: install dependencies from `package-lock.json`.
 - `npm run dev`: start the Vite development server.
