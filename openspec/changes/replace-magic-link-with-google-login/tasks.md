@@ -2,7 +2,7 @@
 
 ## 1. 認証処理
 
-- [ ] 1.1 `src/contexts/app-context.ts` と `src/contexts/AppContext.tsx` で `signIn` と `AuthResult` を `signInWithGoogle` と `signInLocal` に置き換え、`signInWithOtp` の呼び出しが残っていないことをgrepで確認する
+- [x] 1.1 `src/contexts/app-context.ts` と `src/contexts/AppContext.tsx` で `signIn` と `AuthResult` を `signInWithGoogle` と `signInLocal` に置き換え、`signInWithOtp` の呼び出しが残っていないことをgrepで確認する
 - [ ] 1.2 `signInWithGoogle` がデモセッションを終了し、`${origin}/login?returnTo=<戻り先>` を `redirectTo` に渡すことをコードとGoogleの認証画面への遷移で確認する
 
 ## 2. ログイン画面
@@ -16,7 +16,7 @@
 
 ## 3. ドキュメント
 
-- [ ] 3.1 `README.md` のログイン設定をGoogleログインの手順（Google Cloud、Supabase、Redirect URLs、設定の順序）に書き換え、Magic Linkの記述が残っていないことをgrepで確認する
+- [x] 3.1 `README.md` のログイン設定をGoogleログインの手順（Google Cloud、Supabase、Redirect URLs、設定の順序）に書き換え、Magic Linkの記述が残っていないことをgrepで確認する
 
 ## 4. 外部サービスの設定（利用者が実施）
 
@@ -39,6 +39,6 @@
 
 ## 7. 全体の確認
 
-- [ ] 7.1 `openspec validate replace-magic-link-with-google-login --strict` を実行し、エラーがないことを確認する
-- [ ] 7.2 `npm run lint` を実行し、エラーがないことを確認する
-- [ ] 7.3 `npm run build` を実行し、成功することを確認する
+- [x] 7.1 `openspec validate replace-magic-link-with-google-login --strict` を実行し、エラーがないことを確認する
+- [x] 7.2 `npm run lint` を実行し、エラーがないことを確認する
+- [x] 7.3 `npm run build` を実行し、成功することを確認する

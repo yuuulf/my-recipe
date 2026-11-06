@@ -2,10 +2,6 @@ import { createContext, useContext } from 'react'
 import { localGetProfileName } from '../lib/localStorage'
 import type { AppUser, Group, GroupMember } from '../types/database'
 
-export type AuthResult = {
-  magicLinkSent: boolean
-}
-
 export type AppContextValue = {
   user: AppUser | null
   group: Group | null
@@ -15,7 +11,8 @@ export type AppContextValue = {
   isDemoMode: boolean
   isDemoUser: boolean
   enterDemo: () => void
-  signIn: (email: string, redirectPath?: string) => Promise<AuthResult>
+  signInWithGoogle: (redirectPath?: string) => Promise<void>
+  signInLocal: (email: string) => Promise<void>
   signOut: () => Promise<void>
   createGroup: (name: string) => Promise<Group>
   joinGroup: (inviteToken: string) => Promise<Group>
