@@ -25,7 +25,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
 
-Supabase SQL EditorまたはSupabase CLIで [`supabase/migrations/20260928000000_initial_schema.sql`](supabase/migrations/20260928000000_initial_schema.sql) を実行してください。
+Supabase SQL EditorまたはSupabase CLIで、[`supabase/migrations/`](supabase/migrations/) のSQLをファイル名の順にすべて実行してください。
 
 ## Googleログインを設定する
 
