@@ -129,6 +129,11 @@ export function LoginPage() {
         >
           デモのレシピを見る <ArrowRight size={15} />
         </Link>
+        <nav className="login-legal" aria-label="規約">
+          <Link to="/privacy">プライバシーポリシー</Link>
+          <span aria-hidden="true">·</span>
+          <Link to="/terms">利用規約</Link>
+        </nav>
       </main>
 
       <p className="login-footer">あなたの料理の記録を、もっと身近に。</p>

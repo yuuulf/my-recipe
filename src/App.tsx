@@ -4,12 +4,14 @@ import { AppProvider } from './contexts/AppContext'
 import { useApp } from './contexts/app-context'
 import { JoinGroupPage } from './pages/JoinGroupPage'
 import { LoginPage } from './pages/LoginPage'
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage'
 import { RecipeCreatePage } from './pages/RecipeCreatePage'
 import { RecipeDetailPage } from './pages/RecipeDetailPage'
 import { RecipeEditPage } from './pages/RecipeEditPage'
 import { RecipeListPage } from './pages/RecipeListPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SetupPage } from './pages/SetupPage'
+import { TermsPage } from './pages/TermsPage'
 
 function RootRedirect() {
   const { user, group, authReady, groupLoading } = useApp()
@@ -39,6 +41,8 @@ function AppRoutes() {
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/join/:token" element={<JoinGroupPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route path="/setup" element={<AuthGuard><SetupPage /></AuthGuard>} />
       <Route path="/recipes" element={<AuthGuard><GroupGuard><RecipeListPage /></GroupGuard></AuthGuard>} />
       <Route path="/recipes/new" element={<AuthGuard><GroupGuard><RecipeCreatePage /></GroupGuard></AuthGuard>} />
