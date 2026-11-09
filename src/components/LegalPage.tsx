@@ -14,7 +14,7 @@ export function LegalPage({ title, updatedAt, children }: LegalPageProps) {
       <header className="legal-header">
         <Link to="/login" className="brand-lockup compact">
           <div className="brand-mark"><Soup size={19} /></div>
-          <strong>MY RECIPE</strong>
+          <strong>My Recipe</strong>
         </Link>
       </header>
       <main className="legal-card">
