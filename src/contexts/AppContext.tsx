@@ -24,7 +24,7 @@ import {
   startDemoSession,
 } from '../lib/demoData'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { AppContext, type AppContextValue, type AuthResult } from './app-context'
+import { AppContext, type AppContextValue } from './app-context'
 import type { AppUser, Group, GroupMember } from '../types/database'
 
 const mapUser = (user: User): AppUser => ({
@@ -195,27 +195,38 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
   }, [activateDemo, loadGroup])
 
-  const signIn = useCallback(async (email: string, redirectPath = '/recipes'): Promise<AuthResult> => {
+  const signInWithGoogle = useCallback(async (redirectPath?: string) => {
+    if (!supabase) throw new Error('Supabaseが設定されていません。')
+
+    if (isDemoSessionActive()) {
+      setUser(null)
+      setGroup(null)
+      setMembers([])
+    }
+    clearDemoSession()
+    setIsDemoUser(false)
+
+    const loginUrl = new URL('/login', window.location.origin)
+    if (redirectPath) loginUrl.searchParams.set('returnTo', redirectPath)
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: loginUrl.toString(),
+      },
+    })
+    if (error) throw error
+  }, [])
+
+  const signInLocal = useCallback(async (email: string) => {
     if (!email.trim()) throw new Error('メールアドレスを入力してください。')
 
     clearDemoSession()
     setIsDemoUser(false)
 
-    if (!supabase) {
-      const nextUser = localSignIn(email.trim())
-      setUser(nextUser)
-      await loadGroup(nextUser)
-      return { magicLinkSent: false }
-    }
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: `${window.location.origin}${redirectPath}`,
-      },
-    })
-    if (error) throw error
-    return { magicLinkSent: true }
+    const nextUser = localSignIn(email.trim())
+    setUser(nextUser)
+    await loadGroup(nextUser)
   }, [loadGroup])
 
   const signOut = useCallback(async () => {
@@ -305,7 +316,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     isDemoMode: !isSupabaseConfigured,
     isDemoUser,
     enterDemo: activateDemo,
-    signIn,
+    signInWithGoogle,
+    signInLocal,
     signOut,
     createGroup,
     joinGroup,
@@ -320,7 +332,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     joinGroup,
     members,
     refreshGroup,
-    signIn,
+    signInLocal,
+    signInWithGoogle,
     signOut,
     user,
   ])
