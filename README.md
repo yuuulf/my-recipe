@@ -46,9 +46,9 @@ Supabase接続時のログインはGoogleアカウントのみです。ローカ
 ### 2. Supabase
 
 1. Authentication → Sign In / Providers でGoogleを有効にし、Google CloudのクライアントIDとクライアントシークレットを設定します。
-2. Authentication → URL Configuration の Redirect URLs に、本番と開発の `/login` を登録します。
-   - `https://<本番のドメイン>/login`
-   - `http://localhost:5173/login`
+2. Authentication → URL Configuration の Redirect URLs に、本番と開発の `/login**` を登録します。戻り先には `?returnTo=...` のクエリが付くため、末尾の `**` が必要です。`/login` の完全一致では、クエリ付きのURLが受け付けられません。
+   - `https://<本番のドメイン>/login**`
+   - `http://localhost:5173/login**`
 
 Googleでの認証後は `/login` に戻り、ログイン画面が元の画面へ移動します。Redirect URLsに登録していないURLから始めた場合は、Site URLに戻されます。
 
@@ -62,7 +62,7 @@ Vercelのプロジェクトの環境変数に、`.env.local` と同じ `VITE_SUP
 
 1. Google CloudでOAuthクライアントを作成する（同意画面は「テスト」とし、確認に使うアカウントをテストユーザーに登録する）
 2. SupabaseでGoogleプロバイダーを有効にする（メールプロバイダーは有効のままにする）
-3. SupabaseのRedirect URLsに本番と開発の `/login` を登録する
+3. SupabaseのRedirect URLsに本番と開発の `/login**` を登録する
 4. アプリをデプロイする（プライバシーポリシーと利用規約のページを含む）
 5. デプロイ後すぐに、同意画面にホームページ、プライバシーポリシー、利用規約のURLと承認済みドメインを設定し、「本番環境」に切り替える。デプロイからこの手順までの間は、テストユーザー以外はログインできない
 6. 既存の利用者と同じメールアドレスのGoogleアカウントでログインし、同じアカウントとグループが使われることを確認する
