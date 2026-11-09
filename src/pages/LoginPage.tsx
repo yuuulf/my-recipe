@@ -104,7 +104,7 @@ export function LoginPage() {
       <div className="login-orbit login-orbit-two" aria-hidden="true" />
       <div className="login-brand brand-lockup compact">
         <div className="brand-mark"><Soup size={19} /></div>
-        <strong>MY RECIPE</strong>
+        <strong>My Recipe</strong>
       </div>
 
       <main className="login-card">
@@ -149,6 +149,18 @@ export function LoginPage() {
           <Link to="/terms">利用規約</Link>
         </nav>
       </main>
+
+      <section className="login-about" aria-labelledby="login-about-title">
+        <h2 id="login-about-title">My Recipe｜レシピをもっと手軽に管理・共有</h2>
+        <p>My Recipe は、お気に入りの料理レシピを簡単に保存・検索・共有できるWebアプリです。ネットで見つけたレシピや家庭の定番料理をひとつにまとめ、いつでも手軽に確認できます。</p>
+        <h3>主な機能</h3>
+        <ul>
+          <li><strong>レシピ管理</strong>料理名・材料・作り方を登録、編集、削除</li>
+          <li><strong>検索・絞り込み</strong>料理名やタグからレシピを簡単に検索</li>
+          <li><strong>グループ共有</strong>家族やグループでお気に入りのレシピを共有</li>
+          <li><strong>Googleログイン</strong>Googleアカウントで簡単にログイン</li>
+        </ul>
+      </section>
 
       <p className="login-footer">あなたの料理の記録を、もっと身近に。</p>
     </div>

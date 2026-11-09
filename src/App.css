@@ -277,7 +277,7 @@ a.invite-link-box:hover { color: var(--primary-hover); border-color: #b9c9be; }
 .settings-danger-zone p { margin: 0; color: var(--text-muted); font-size: 13px; }
 
 /* Login */
-.login-page { position: relative; min-height: 100vh; display: grid; place-items: center; padding: 72px 20px 20px; overflow-x: hidden; overflow-y: auto; background: var(--primary-soft); }
+.login-page { position: relative; min-height: 100vh; display: grid; place-items: center; align-content: center; padding: 72px 20px 48px; overflow: hidden; background: var(--primary-soft); }
 .login-page::before { position: absolute; top: -245px; right: -180px; width: 580px; height: 580px; content: ''; border: 1px solid rgba(52, 120, 89, .12); border-radius: 50%; box-shadow: 0 0 0 48px rgba(52, 120, 89, .025), 0 0 0 96px rgba(52, 120, 89, .025); }
 .login-page::after { position: absolute; bottom: -270px; left: -210px; width: 560px; height: 560px; content: ''; background: radial-gradient(circle, rgba(52, 120, 89, .1), transparent 68%); }
 .login-orbit { position: absolute; z-index: 0; border: 1px solid rgba(52, 120, 89, .1); border-radius: 50%; }
@@ -315,6 +315,13 @@ a.invite-link-box:hover { color: var(--primary-hover); border-color: #b9c9be; }
 .login-legal { display: flex; justify-content: center; gap: 8px; margin-top: 26px; color: var(--text-muted); font-size: 12px; }
 .login-legal a { color: var(--text-muted); text-decoration: underline; text-underline-offset: 2px; }
 .login-legal a:hover { color: var(--primary); }
+.login-about { position: relative; z-index: 1; width: min(470px, 100%); margin-top: 40px; padding: 0 4px; color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+.login-about h2 { margin: 0 0 12px; color: var(--text); font-size: 17px; font-weight: 750; line-height: 1.5; }
+.login-about h3 { margin: 20px 0 8px; color: var(--text); font-size: 14px; font-weight: 700; }
+.login-about p { margin: 0; }
+.login-about ul { display: grid; gap: 8px; margin: 0 0 20px; padding: 0; list-style: none; }
+.login-about li { display: grid; gap: 2px; }
+.login-about li strong { color: var(--primary); font-size: 13px; }
 .login-footer { position: absolute; z-index: 1; bottom: 10px; margin: 0; color: var(--text-muted); font-size: 12px; font-style: italic; }
 
 /* Setup and invite */
@@ -356,6 +363,13 @@ a.invite-link-box:hover { color: var(--primary-hover); border-color: #b9c9be; }
 .join-footer { position: absolute; bottom: 30px; margin: 0; color: var(--text-muted); font-size: 12px; font-style: italic; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+@media (min-width: 961px) {
+  .login-page { grid-template-columns: minmax(0, 460px) 470px; column-gap: 72px; justify-content: center; padding: 80px 40px 48px; }
+  .login-about { order: -1; width: auto; margin-top: 0; padding: 0; }
+  .login-about h2 { margin-bottom: 16px; font-size: 26px; letter-spacing: -.03em; }
+  .login-about li { grid-template-columns: 7.5em 1fr; gap: 12px; }
+}
 
 @media (max-width: 1199px) {
   .sidebar { width: 220px; }
