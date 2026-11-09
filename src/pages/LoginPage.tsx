@@ -1,5 +1,5 @@
 import { ArrowRight, Mail, Soup } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { PageLoader } from '../components/Loading'
@@ -45,6 +45,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const googleSignInStartedRef = useRef(false)
   const [searchParams] = useSearchParams()
   const destination = [
     (location.state as { from?: unknown } | null)?.from,
@@ -54,6 +55,17 @@ export function LoginPage() {
     ? 'Googleでログインできませんでした。もう一度お試しください。'
     : ''
   const displayedError = error || urlError
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted || !googleSignInStartedRef.current) return
+      googleSignInStartedRef.current = false
+      setIsSubmitting(false)
+      setError('ログインが完了しませんでした。もう一度お試しください。')
+    }
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
+  }, [])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -71,9 +83,11 @@ export function LoginPage() {
   const handleGoogleSignIn = async () => {
     setError('')
     setIsSubmitting(true)
+    googleSignInStartedRef.current = true
     try {
       await signInWithGoogle(destination)
     } catch (signInError) {
+      googleSignInStartedRef.current = false
       setError(getErrorMessage(signInError, 'Googleログインを開始できませんでした。'))
       setIsSubmitting(false)
     }

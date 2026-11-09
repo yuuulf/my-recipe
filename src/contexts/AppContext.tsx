@@ -198,6 +198,11 @@ export function AppProvider({ children }: PropsWithChildren) {
   const signInWithGoogle = useCallback(async (redirectPath?: string) => {
     if (!supabase) throw new Error('Supabaseが設定されていません。')
 
+    if (isDemoSessionActive()) {
+      setUser(null)
+      setGroup(null)
+      setMembers([])
+    }
     clearDemoSession()
     setIsDemoUser(false)
 
