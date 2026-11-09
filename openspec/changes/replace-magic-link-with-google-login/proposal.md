@@ -15,6 +15,7 @@
 - ログイン済みの利用者がログイン画面を開いた場合は、元の画面または初期画面に移動する
 - ローカルプレビューは、外部の認証サービスを使わず、メールアドレス入力のログインを維持する。誤解を招く文言は実際の動作に合わせて修正する（既知の差異 #6 のうち文言の部分）
 - Supabase、Google Cloud、Vercelの設定手順をREADMEに記載する
+- Google Cloudの同意画面を本番公開するため、ホームページ（ログイン画面）、プライバシーポリシー（`/privacy`）、利用規約（`/terms`）を用意する。プライバシーポリシーと利用規約は、すべての動作モードで未ログインでも開ける
 
 ### 利用者に見える効果
 
@@ -33,6 +34,7 @@
 
 - ログイン、ログアウト、セッション維持、認証が必要な画面の保護を `auth` のspecとして記録する
 - 招待画面からログインして招待画面へ戻る流れ
+- プライバシーポリシーと利用規約のページと、ログイン画面からのリンク
 
 ### 対象外
 
@@ -46,7 +48,7 @@
 
 ### New Capabilities
 
-- `auth`: Googleログイン、ローカルプレビューのログイン、ログアウト、セッション維持、認証が必要な画面の保護、ログイン後の移動
+- `auth`: Googleログイン、ローカルプレビューのログイン、ログアウト、セッション維持、認証が必要な画面の保護、ログイン後の移動、プライバシーポリシーと利用規約の表示
 
 ### Modified Capabilities
 
@@ -54,8 +56,8 @@
 
 ## Impact
 
-- **コード:** `src/contexts/AppContext.tsx`、`src/contexts/app-context.ts`、`src/pages/LoginPage.tsx`、`src/App.css`
+- **コード:** `src/contexts/AppContext.tsx`、`src/contexts/app-context.ts`、`src/pages/LoginPage.tsx`、`src/App.css`、`src/App.tsx`、新規の `src/pages/PrivacyPolicyPage.tsx` と `src/pages/TermsPage.tsx`
 - **依存関係:** 追加なし。既存の `@supabase/supabase-js` を使う
 - **スキーマ:** 変更なし。Googleで初めてログインした利用者のプロフィールは既存のトリガーで作られ、既存の利用者は同じアカウントが使われる想定のため
-- **外部設定:** Google CloudのOAuthクライアント、SupabaseのGoogleプロバイダーとRedirect URLs、メールプロバイダーの無効化が必要。コードのデプロイより先に行う設定がある
+- **外部設定:** Google CloudのOAuthクライアント、同意画面のURL（ホームページ、プライバシーポリシー、利用規約）と承認済みドメインの登録と本番公開への切り替え、SupabaseのGoogleプロバイダーとRedirect URLs、メールプロバイダーの無効化が必要。コードのデプロイより先に行う設定がある
 - **ドキュメント:** `README.md` のログイン設定の説明
