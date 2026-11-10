@@ -1,0 +1,102 @@
+# When the "archive" label is added to a pull request, archive the OpenSpec
+# changes that the pull request touches and push the result to its branch.
+name: OpenSpec archive
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: openspec-archive-${{ github.event.pull_request.number }}
+
+jobs:
+  archive:
+    # Pull requests from forks get a read-only token, so they are skipped.
+    if: >-
+      github.event.label.name == 'archive' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      # The archive folder name starts with the date, so use Japan time.
+      TZ: Asia/Tokyo
+      OPENSPEC_TELEMETRY: '0'
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_REF: ${{ github.event.pull_request.base.ref }}
+      HEAD_REF: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install OpenSpec
+        run: npm install -g @fission-ai/openspec@1.15.0
+
+      - name: Find the changes this pull request touches
+        id: changes
+        run: |
+          names=$(git diff --name-only "origin/$BASE_REF...HEAD" -- openspec/changes/ \
+            | grep -v '^openspec/changes/archive/' \
+            | cut -d/ -f3 | sort -u \
+            | while read -r name; do
+                if [ -f "openspec/changes/$name/.openspec.yaml" ]; then echo "$name"; fi
+              done)
+          if [ -z "$names" ]; then
+            echo "::error::このプルリクエストには、アーカイブするOpenSpecの変更がありません"
+            exit 1
+          fi
+          echo "Changes: $names"
+          {
+            echo 'names<<EOF'
+            echo "$names"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check that every task is done and the change is valid
+        env:
+          NAMES: ${{ steps.changes.outputs.names }}
+        run: |
+          status=0
+          while read -r name; do
+            counts=$(openspec list --json | jq -r --arg n "$name" \
+              '.changes[] | select(.name == $n) | "\(.completedTasks) \(.totalTasks)"')
+            read -r done total <<< "$counts"
+            if [ -z "$total" ] || [ "$done" != "$total" ]; then
+              echo "::error::$name: 未完了のタスクがあります（${done:-?}/${total:-?}）"
+              status=1
+            fi
+            openspec validate "$name" --strict || status=1
+          done <<< "$NAMES"
+          exit $status
+
+      - name: Archive and push
+        env:
+          NAMES: ${{ steps.changes.outputs.names }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          while read -r name; do
+            openspec archive "$name" -y
+            git add -A openspec
+            git commit -m "${name}の変更をアーカイブ"
+          done <<< "$NAMES"
+          git push origin "HEAD:$HEAD_REF"
+
+      - name: Report a failure on the pull request
+        if: failure()
+        run: |
+          gh pr comment "$PR_NUMBER" --body "OpenSpecのアーカイブに失敗しました。ログ: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      # Remove the label either way, so adding it again runs the job again.
+      - name: Remove the label
+        if: always()
+        run: gh pr edit "$PR_NUMBER" --remove-label archive
