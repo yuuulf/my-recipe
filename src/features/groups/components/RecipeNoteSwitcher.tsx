@@ -15,8 +15,9 @@ const triggerClassNames = {
   header: 'flex min-h-8.5 w-full max-w-44 items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 text-13 font-bold text-text',
 }
 
+// Both panels are 256px wide; in the sidebar it may extend over the main area.
 const panelClassNames = {
-  sidebar: 'left-0 right-0',
+  sidebar: 'left-0 w-64',
   header: 'right-0 w-64 max-w-[calc(100vw-32px)]',
 }
 
