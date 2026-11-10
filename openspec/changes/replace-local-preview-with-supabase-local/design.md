@@ -145,6 +145,6 @@ skip_nonce_check = false
 - [`supabase start` の初回はイメージの取得に時間がかかる] → README に初回は時間がかかることを書く
 - [seed で `auth.users` に直接入れる列が、Supabase の Auth のバージョンで変わることがある] → 必要な列（`id`、`instance_id`、`aud`、`role`、`email`、`raw_user_meta_data`、作成日時）だけを入れ、`npm run db:reset` が通ることを確かめる
 - [Google の戻り先に `127.0.0.1` と `localhost` が混ざり、Cookie や戻り先の照合でつまずく] → Supabase Local の API は `127.0.0.1:54321`、アプリは `localhost:5173` に統一し、`site_url` と `additional_redirect_urls` は `localhost` で書く。手動確認で Google ログインが戻ってくることを確かめる
-- [手元から本番の DB を確かめる手段がなくなる] → 探索で決めたとおり、本番の動きは Vercel のデプロイで確かめる
+- [手元から本番の DB を確かめる手段がなくなる] → 探索で決めたとおり、本番の動きは Vercel の本番のデプロイで確かめる。Vercel のプレビューの環境には Supabase の環境変数を設定しない（プレビューから本番の DB に触れないため）。プレビューでは接続設定がないときの画面とデモが表示され、本番の Supabase への接続はマージした後に本番で確かめる
 - [Supabase CLI の npm パッケージはインストール時に実行ファイルを取得するため、`npm ci` がネットワークに依存する] → 開発用の依存なので、Vercel のビルドへの影響を確かめる（Vercel のビルドでも `devDependencies` が入るため、取得に失敗するとビルドが止まる）。問題があれば Vercel のインストールの設定を見直す
 - [ブラウザにローカルプレビューのデータが残る] → 使われなくなるだけで害はない。消す処理は入れない
