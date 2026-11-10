@@ -11,7 +11,7 @@ My Recipe is a React 19, TypeScript, and Vite application for shared recipe mana
 - `src/types/database.ts`: shared database and form types.
 - `src/assets/` and `public/`: bundled images and static assets.
 - Styling uses Tailwind CSS v4. The theme (`@theme`) and global base styles live in `src/index.css`; shared class names live in `src/components/styles.ts` and `src/components/buttonStyles.ts`.
-- `supabase/migrations/`: ordered SQL migrations; `supabase/seed.sql`: sample data for Supabase Local; `supabase/config.toml`: Supabase Local settings; `docs/`: implementation and design plans.
+- `supabase/migrations/`: ordered SQL migrations; `supabase/seed.sql`: sample data for Supabase Local; `supabase/config.toml`: Supabase Local settings; `supabase/functions/`: Supabase Edge Functions (`recipe-draft` calls OpenRouter for AI recipe drafts); `docs/`: implementation and design plans.
 
 ## Build, Test, and Development Commands
 
@@ -40,4 +40,4 @@ Recent commits use short, descriptive Japanese messages, such as `デモモー�
 
 ## Configuration & Security
 
-Copy `.env.example` to `.env.local` and set `API_URL` and `PUBLISHABLE_KEY` from `npm run db:status` (never `SECRET_KEY`). Keep production connection values only in Vercel. Put the Google OAuth client ID and secret for Supabase Local in `supabase/.env`, which is untracked. Never expose service-role keys through `VITE_*` variables. Keep local environment files untracked. Add schema changes as timestamped SQL migrations, keep `supabase/seed.sql` working with them (`npm run db:reset`), and preserve group access controls through RLS and RPC behavior.
+Copy `.env.example` to `.env.local` and set `API_URL` and `PUBLISHABLE_KEY` from `npm run db:status` (never `SECRET_KEY`). Keep production connection values only in Vercel. Put the Google OAuth client ID and secret for Supabase Local in `supabase/.env`, and the OpenRouter API key and model in `supabase/functions/.env`; both are untracked. Production Edge Function secrets are set with `npx supabase secrets set`. Never send the OpenRouter key to the browser; only Edge Functions read it. Never expose service-role keys through `VITE_*` variables. Keep local environment files untracked. Add schema changes as timestamped SQL migrations, keep `supabase/seed.sql` working with them (`npm run db:reset`), and preserve group access controls through RLS and RPC behavior.

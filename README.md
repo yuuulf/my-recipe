@@ -115,11 +115,45 @@ Vercelのプロジェクトの環境変数に、本番のSupabaseの `VITE_SUPAB
 
 ロールバックするときは、Vercelで前のデプロイに戻します。メールプロバイダーを無効にした後であれば、再度有効にします。
 
+## AIの下書きを設定する
+
+レシピの追加画面の「文章から下書きを作る」は、貼り付けた文章から下書きを作り、フォームに入れる機能です。Supabase Edge Function（[`supabase/functions/recipe-draft/`](supabase/functions/recipe-draft/)）が OpenRouter を呼びます。OpenRouter のAPIキーはEdge Functionのシークレットにだけ置き、ブラウザには渡しません。設定がない場合、この機能は「下書きを作れませんでした」と表示し、ほかの機能は動きます。
+
+### 1. OpenRouter
+
+1. OpenRouter のアカウントを作り、APIキーを作成します。
+2. 使うモデルを決めます。いまは無料のモデルの中から要求ごとに選ばれる `openrouter/free` を使っています。決まった形のJSONで返す機能（構造化出力）に対応していることが必要です。モデルによって、送った文章の扱い（記録や学習）が違う点に注意してください。
+3. 無料のモデルは、1分20回、1日50回までです（クレジットを10以上買うと1日1,000回）。
+
+### 2. 手元（Supabase Local）
+
+[`supabase/functions/.env.example`](supabase/functions/.env.example) を `supabase/functions/.env` にコピーし、値を書きます。このファイルはGitの管理外です。
+
+```env
+OPENROUTER_API_KEY=your-openrouter-api-key
+OPENROUTER_MODEL=openrouter/free
+```
+
+書いた後は `npm run db:stop && npm run db:start` で起動し直します。Edge Functionは `supabase start` で一緒に動きます。
+
+### 3. 本番
+
+本番のSupabaseのプロジェクトに、シークレットを設定してEdge Functionをデプロイします。
+
+```bash
+npx supabase login
+npx supabase link --project-ref <プロジェクトID>
+npx supabase secrets set OPENROUTER_API_KEY=your-openrouter-api-key OPENROUTER_MODEL=openrouter/free
+npx supabase functions deploy recipe-draft
+```
+
+モデルを替えるときは、`OPENROUTER_MODEL` を設定し直すだけで、デプロイし直す必要はありません。
+
 ## デモ
 
 ログイン画面の「デモのレシピを見る」から、Supabaseに依存しない固定データのデモを開けます。接続設定がないときの案内の画面からも開けます。デモユーザーのメールアドレスは `demonstration@example.com` です。
 
-デモではレシピの追加・編集画面を表示できますが、「レシピを保存」「変更を保存」は無効です。削除操作は表示せず、グループ設定とメンバー情報も固定表示で、メンバー招待リンクはログイン画面を指します。
+デモではレシピの追加・編集画面を表示できますが、「レシピを保存」「変更を保存」と、追加画面のAIの下書きは無効です。削除操作は表示せず、グループ設定とメンバー情報も固定表示で、メンバー招待リンクはログイン画面を指します。
 
 ## コマンド
 
