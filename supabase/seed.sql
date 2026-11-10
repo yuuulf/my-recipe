@@ -7,6 +7,7 @@
 
 -- A sample owner who cannot sign in: no password, and email sign-up is disabled
 -- in config.toml. The on_auth_user_created trigger creates the profile.
+-- The token columns must be '' rather than NULL, or Auth fails to read the user.
 insert into auth.users (
   instance_id,
   id,
@@ -15,6 +16,10 @@ insert into auth.users (
   email,
   raw_app_meta_data,
   raw_user_meta_data,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
   created_at,
   updated_at
 ) values (
@@ -25,6 +30,10 @@ insert into auth.users (
   'sample@example.com',
   '{"provider": "email", "providers": ["email"]}',
   '{"display_name": "サンプル"}',
+  '',
+  '',
+  '',
+  '',
   now(),
   now()
 );

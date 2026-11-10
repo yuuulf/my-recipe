@@ -16,7 +16,9 @@ import {
 } from '../../../components/styles'
 import { getErrorMessage } from '../../../lib/errors'
 import type { RecipeFormValues } from '../../../types/database'
+import type { RecipeDraft } from '../api/recipeDraft'
 import { IngredientEditor } from './IngredientEditor'
+import { RecipeDraftAssist } from './RecipeDraftAssist'
 import { StepEditor } from './StepEditor'
 import { TagInput } from './TagInput'
 
@@ -59,9 +61,11 @@ type RecipeFormProps = {
   submitLabel: string
   onSubmit: (values: RecipeFormValues) => Promise<void>
   disableSave?: boolean
+  // Shows the AI draft panel (on the create screen only).
+  draftAssist?: boolean
 }
 
-export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave = false }: RecipeFormProps) {
+export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave = false, draftAssist = false }: RecipeFormProps) {
   const [submitError, setSubmitError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const { register, handleSubmit, watch, setValue, reset, formState: { errors, isDirty } } = useForm<RecipeFormValues>({
@@ -115,6 +119,18 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
     setValue('steps', next.length ? next : [''], { shouldDirty: true })
   }
 
+  // Replaces the form with the draft. Keeping the default values leaves the form
+  // dirty, so leaving the page still asks for confirmation.
+  const applyDraft = (draft: RecipeDraft) => {
+    reset({
+      ...fallbackValues,
+      ...draft,
+      ingredients: draft.ingredients?.length ? draft.ingredients : [''],
+      steps: draft.steps?.length ? draft.steps : [''],
+      tags: draft.tags ?? [],
+    }, { keepDefaultValues: true })
+  }
+
   // Swaps two rows. The editors only offer moves to an existing neighbor row.
   const moveRow = (name: 'ingredients' | 'steps', from: number, to: number) => {
     const values = name === 'ingredients' ? ingredientValues : stepValues
@@ -133,6 +149,8 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
 
       {disableSave ? <div className="mb-6 rounded-md border border-primary/20 bg-primary-soft px-3.25 py-2.75 text-13 leading-[1.6] text-primary-hover" role="note">デモモードではレシピを閲覧・編集できますが、変更は保存できません。</div> : null}
       {submitError ? <div className={alertErrorClassName} role="alert">{submitError}</div> : null}
+
+      {draftAssist ? <RecipeDraftAssist hasInput={isDirty} disabled={disableSave} onApply={applyDraft} /> : null}
 
       <section className={sectionClassName}>
         <div className={sectionMarkerClassName()}><BookOpen size={17} /></div>

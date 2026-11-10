@@ -13,6 +13,7 @@ export function RecipeCreatePage() {
       <RecipeForm
         submitLabel="レシピを保存"
         disableSave={isDemoUser}
+        draftAssist
         onSubmit={async (values) => {
           if (isDemoUser) throw new Error('デモモードではレシピを保存できません。')
           if (!group || !user) throw new Error('レシピノートが見つかりません。')
