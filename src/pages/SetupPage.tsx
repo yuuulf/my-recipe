@@ -1,19 +1,24 @@
-import { ArrowRight, BookOpen, UsersRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, UsersRound } from 'lucide-react'
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
-import { alertErrorClassName, eyebrowClassName, fieldLabelClassName, textInputClassName } from '../components/styles'
+import { PageLoader } from '../components/Loading'
+import { alertErrorClassName, backLinkClassName, eyebrowClassName, fieldLabelClassName, textInputClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 
 export function SetupPage() {
-  const { createGroup, user, isDemoUser } = useApp()
+  const { createGroup, groups, groupLoading, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [groupName, setGroupName] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (isDemoUser) return <Navigate to="/recipes" replace />
+  if (groupLoading) return <PageLoader />
+
+  // A user who already belongs to a recipe note is creating another one.
+  const hasNotes = groups.length > 0
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -34,10 +39,11 @@ export function SetupPage() {
       <div className="absolute -top-67.5 -right-40 size-150 rounded-full border border-primary/13" />
       <div className="absolute -bottom-87.5 -left-65 size-170 rounded-full border border-primary/13" />
       <div className="relative z-1 w-[min(470px,100%)] rounded-lg border border-border bg-white/96 px-5.5 py-7.5 shadow-md sm:p-10.5">
+        {hasNotes ? <Link to="/recipes" className={`${backLinkClassName} mb-5`}><ArrowLeft size={17} /> 戻る</Link> : null}
         <div className="mb-5.75 grid size-12.25 place-items-center rounded-md bg-primary-soft text-primary"><BookOpen size={25} /></div>
-        <span className={eyebrowClassName}>ONE LAST STEP</span>
-        <h1 className="mt-3 mb-2.5 text-26 font-bold tracking-[-.045em] text-text sm:text-30">レシピノートをつくりましょう</h1>
-        <p className="mb-6.5 text-14 leading-[1.85] text-text-secondary">家族や友人と共有するレシピノートに名前をつけます。</p>
+        {hasNotes ? null : <span className={eyebrowClassName}>ONE LAST STEP</span>}
+        <h1 className="mt-3 mb-2.5 text-26 font-bold tracking-[-.045em] text-text sm:text-30">{hasNotes ? '新しいレシピノートを作る' : 'レシピノートをつくりましょう'}</h1>
+        <p className="mb-6.5 text-14 leading-[1.85] text-text-secondary">{hasNotes ? '新しいレシピノートに名前をつけます。作ったレシピノートが開きます。' : '家族や友人と共有するレシピノートに名前をつけます。'}</p>
         <form onSubmit={(event) => void handleSubmit(event)}>
           <label className={fieldLabelClassName} htmlFor="group-name">レシピノートの名前</label>
           <input id="group-name" className={textInputClassName({ size: 'tall' })} value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="例：我が家のレシピ" maxLength={50} autoFocus required />

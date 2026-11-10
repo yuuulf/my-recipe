@@ -34,7 +34,7 @@ const stepItemClassName = [
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { group, user, isDemoUser } = useApp()
+  const { group, groups, selectGroup, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(true)
@@ -50,7 +50,13 @@ export function RecipeDetailPage() {
       .then((data) => {
         if (!active) return
         if (data && group && data.group_id !== group.id) {
-          setRecipe(null)
+          // A recipe of another recipe note the user belongs to: open that note and show it.
+          if (groups.some((item) => item.id === data.group_id)) {
+            setRecipe(data)
+            void selectGroup(data.group_id)
+          } else {
+            setRecipe(null)
+          }
         } else {
           setRecipe(data)
         }
@@ -62,7 +68,7 @@ export function RecipeDetailPage() {
         if (active) setLoading(false)
       })
     return () => { active = false }
-  }, [group, id, isDemoUser])
+  }, [group, groups, id, isDemoUser, selectGroup])
 
   const handleDelete = async () => {
     if (!id) return

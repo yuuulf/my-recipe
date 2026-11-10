@@ -34,17 +34,37 @@ const normalizeGroup = (value: unknown): Group | null => {
   return groupValue as Group
 }
 
-const getSupabaseGroup = async (userId: string): Promise<Group | null> => {
+// Every recipe note the user belongs to, oldest membership first.
+const getSupabaseGroups = async (userId: string): Promise<Group[]> => {
   const { data, error } = await getSupabase()
     .from('group_members')
     .select('group_id, role, created_at, groups(*)')
     .eq('user_id', userId)
     .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
 
   if (error) throw error
-  return normalizeGroup((data as { groups?: unknown } | null)?.groups)
+  return ((data ?? []) as Array<{ groups?: unknown }>)
+    .map((row) => normalizeGroup(row.groups))
+    .filter((value): value is Group => value !== null)
+}
+
+// The open recipe note is remembered per account in this browser only.
+const groupStorageKey = (userId: string) => `my-recipe:current-group:${userId}`
+
+const readStoredGroupId = (userId: string) => {
+  try {
+    return window.localStorage.getItem(groupStorageKey(userId))
+  } catch {
+    return null
+  }
+}
+
+const storeGroupId = (userId: string, groupId: string) => {
+  try {
+    window.localStorage.setItem(groupStorageKey(userId), groupId)
+  } catch {
+    // Without storage the oldest recipe note opens next time, as before.
+  }
 }
 
 const getSupabaseMembers = async (groupId: string): Promise<GroupMember[]> => {
@@ -80,14 +100,18 @@ const getSessionUser = (session: Session | null) =>
 
 export function AppProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<AppUser | null>(null)
+  const [groups, setGroups] = useState<Group[]>([])
   const [group, setGroup] = useState<Group | null>(null)
   const [members, setMembers] = useState<GroupMember[]>([])
   const [authReady, setAuthReady] = useState(false)
   const [groupLoading, setGroupLoading] = useState(false)
   const [isDemoUser, setIsDemoUser] = useState(() => isDemoSessionActive())
 
-  const loadGroup = useCallback(async (nextUser: AppUser | null) => {
+  // Loads the user's recipe notes and opens one: the preferred one, else the
+  // remembered one, else the oldest membership.
+  const loadGroup = useCallback(async (nextUser: AppUser | null, preferredGroupId?: string) => {
     if (!nextUser) {
+      setGroups([])
       setGroup(null)
       setMembers([])
       return
@@ -95,16 +119,21 @@ export function AppProvider({ children }: PropsWithChildren) {
 
     setGroupLoading(true)
     try {
-      const nextGroup = await getSupabaseGroup(nextUser.id)
+      const nextGroups = await getSupabaseGroups(nextUser.id)
+      const wantedId = preferredGroupId ?? readStoredGroupId(nextUser.id)
+      const nextGroup = nextGroups.find((item) => item.id === wantedId) ?? nextGroups[0] ?? null
+      setGroups(nextGroups)
       setGroup(nextGroup)
 
       if (nextGroup) {
+        storeGroupId(nextUser.id, nextGroup.id)
         setMembers(await getSupabaseMembers(nextGroup.id))
       } else {
         setMembers([])
       }
     } catch (error) {
       console.error('Failed to load group', error)
+      setGroups([])
       setGroup(null)
       setMembers([])
     } finally {
@@ -112,10 +141,26 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
   }, [])
 
+  // Opens another recipe note the user belongs to and remembers it.
+  const selectGroup = useCallback(async (groupId: string) => {
+    if (!user || isDemoUser) return
+    const nextGroup = groups.find((item) => item.id === groupId)
+    if (!nextGroup || nextGroup.id === group?.id) return
+    setGroup(nextGroup)
+    setMembers([])
+    storeGroupId(user.id, nextGroup.id)
+    try {
+      setMembers(await getSupabaseMembers(nextGroup.id))
+    } catch (error) {
+      console.error('Failed to load members', error)
+    }
+  }, [group?.id, groups, isDemoUser, user])
+
   const activateDemo = useCallback(() => {
     startDemoSession()
     setIsDemoUser(true)
     setUser(getDemoUser())
+    setGroups([getDemoGroup()])
     setGroup(getDemoGroup())
     setMembers(getDemoMembers())
     setGroupLoading(false)
@@ -178,6 +223,7 @@ export function AppProvider({ children }: PropsWithChildren) {
 
     if (isDemoSessionActive()) {
       setUser(null)
+      setGroups([])
       setGroup(null)
       setMembers([])
     }
@@ -205,6 +251,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     clearDemoSession()
     setIsDemoUser(false)
     setUser(null)
+    setGroups([])
     setGroup(null)
     setMembers([])
   }, [])
@@ -222,10 +269,8 @@ export function AppProvider({ children }: PropsWithChildren) {
       ?? (() => {
         throw new Error('レシピノートの作成結果を取得できませんでした。')
       })()
-    setGroup(nextGroup)
-    await loadGroup(user)
-    setGroup(nextGroup)
-    setMembers(await getSupabaseMembers(nextGroup.id))
+    // Open the new recipe note.
+    await loadGroup(user, nextGroup.id)
     return nextGroup
   }, [isDemoUser, loadGroup, user])
 
@@ -238,27 +283,31 @@ export function AppProvider({ children }: PropsWithChildren) {
       p_invite_token: inviteToken.trim(),
     })
     if (error) throw error
-    await loadGroup(user)
-    const nextGroup = await getSupabaseGroup(user.id) ?? (() => {
+    if (!data) throw new Error('レシピノートに参加できませんでした。')
+    // join_group returns the joined note's id, also when already a member. Open it.
+    const joinedId = String(data)
+    const nextGroups = await getSupabaseGroups(user.id)
+    const nextGroup = nextGroups.find((item) => item.id === joinedId) ?? (() => {
       throw new Error('レシピノートに参加した後の情報を取得できませんでした。')
     })()
-    if (!data) throw new Error('レシピノートに参加できませんでした。')
-    setGroup(nextGroup)
-    setMembers(await getSupabaseMembers(nextGroup.id))
+    await loadGroup(user, nextGroup.id)
     return nextGroup
   }, [isDemoUser, loadGroup, user])
 
   const refreshGroup = useCallback(async () => {
     if (isDemoUser) {
+      setGroups([getDemoGroup()])
       setGroup(getDemoGroup())
       setMembers(getDemoMembers())
       return
     }
-    await loadGroup(user)
-  }, [isDemoUser, loadGroup, user])
+    // Keep the open recipe note.
+    await loadGroup(user, group?.id)
+  }, [group?.id, isDemoUser, loadGroup, user])
 
   const value = useMemo<AppContextValue>(() => ({
     user,
+    groups,
     group,
     members,
     authReady,
@@ -270,16 +319,19 @@ export function AppProvider({ children }: PropsWithChildren) {
     createGroup,
     joinGroup,
     refreshGroup,
+    selectGroup,
   }), [
     authReady,
     activateDemo,
     createGroup,
     group,
     groupLoading,
+    groups,
     isDemoUser,
     joinGroup,
     members,
     refreshGroup,
+    selectGroup,
     signInWithGoogle,
     signOut,
     user,

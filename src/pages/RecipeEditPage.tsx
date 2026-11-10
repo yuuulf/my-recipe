@@ -11,7 +11,7 @@ import type { RecipeFormValues } from '../types/database'
 
 export function RecipeEditPage() {
   const { id } = useParams<{ id: string }>()
-  const { group, user, isDemoUser } = useApp()
+  const { group, groups, selectGroup, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [values, setValues] = useState<RecipeFormValues | null>(null)
   const [loading, setLoading] = useState(true)
@@ -23,16 +23,19 @@ export function RecipeEditPage() {
     void getRecipe(id, isDemoUser)
       .then((recipe) => {
         if (!active) return
-        if (!recipe || (group && recipe.group_id !== group.id)) {
+        // A recipe of another recipe note the user belongs to: open that note and edit it.
+        const inOtherNote = Boolean(recipe && group && recipe.group_id !== group.id)
+        if (!recipe || (inOtherNote && !groups.some((item) => item.id === recipe.group_id))) {
           setError('レシピが見つかりません。')
           return
         }
+        if (inOtherNote) void selectGroup(recipe.group_id)
         setValues(recipeToFormValues(recipe))
       })
       .catch((loadError: unknown) => { if (active) setError(getErrorMessage(loadError, 'レシピを読み込めませんでした。')) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [group, id, isDemoUser])
+  }, [group, groups, id, isDemoUser, selectGroup])
 
   return (
     <AppShell>
