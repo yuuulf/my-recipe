@@ -14,8 +14,8 @@ export function RecipeCreatePage() {
         submitLabel="レシピを保存"
         disableSave={isDemoUser}
         onSubmit={async (values) => {
-          if (isDemoUser) throw new Error('デモユーザーはレシピを保存できません。')
-          if (!group || !user) throw new Error('レシピ帳が見つかりません。')
+          if (isDemoUser) throw new Error('デモモードではレシピを保存できません。')
+          if (!group || !user) throw new Error('レシピノートが見つかりません。')
           const recipe = await createRecipe(values, group.id, user.id, isDemoUser)
           navigate(`/recipes/${recipe.id}`)
         }}

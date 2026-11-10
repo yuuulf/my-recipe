@@ -13,7 +13,7 @@ import { eyebrowClassName, iconButtonClassName } from '../styles'
 
 const navItems = [
   { to: '/recipes', label: 'レシピ一覧', icon: BookOpen },
-  { to: '/settings', label: 'グループ設定', icon: UsersRound },
+  { to: '/settings', label: 'レシピノートの設定', icon: UsersRound },
 ]
 
 const navItemClassName = (isActive: boolean) =>
@@ -39,10 +39,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <BrandLockup variant="full" />
 
         <div className="mx-1 mt-10.5 mb-6.25">
-          <span className={`${eyebrowClassName} mb-2.5`}>選択中のノート</span>
+          <span className={`${eyebrowClassName} mb-2.5`}>選択中のレシピノート</span>
           <div className="flex items-center gap-2.25 text-14 font-bold text-text">
             <span className="grid size-7 flex-none place-items-center rounded-md bg-primary-soft text-12 font-extrabold text-primary">{group?.name.slice(0, 1) ?? '？'}</span>
-            <span>{group?.name ?? 'グループ未設定'}</span>
+            <span>{group?.name ?? 'レシピノート未設定'}</span>
           </div>
         </div>
 
@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {isDemoUser || isDemoMode ? (
             <div className="mb-3 flex items-center gap-1.5 text-12 text-text-muted">
               <span className="size-1.75 rounded-full bg-primary/70 ring-3 ring-primary-soft" />
-              <span>{isDemoUser ? 'デモ閲覧中' : 'ローカルプレビュー中'}</span>
+              <span>{isDemoUser ? 'デモモード' : 'ローカルプレビュー中'}</span>
             </div>
           ) : null}
           <div className="flex min-w-0 items-center gap-2.25">

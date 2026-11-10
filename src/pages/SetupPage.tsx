@@ -23,7 +23,7 @@ export function SetupPage() {
       await createGroup(groupName)
       navigate('/recipes', { replace: true })
     } catch (submitError) {
-      setError(getErrorMessage(submitError, 'レシピ帳を作成できませんでした。'))
+      setError(getErrorMessage(submitError, 'レシピノートを作成できませんでした。'))
     } finally {
       setIsSubmitting(false)
     }
@@ -36,13 +36,13 @@ export function SetupPage() {
       <div className="relative z-1 w-[min(470px,100%)] rounded-lg border border-border bg-white/96 px-5.5 py-7.5 shadow-md sm:p-10.5">
         <div className="mb-5.75 grid size-12.25 place-items-center rounded-md bg-primary-soft text-primary"><BookOpen size={25} /></div>
         <span className={eyebrowClassName}>ONE LAST STEP</span>
-        <h1 className="mt-3 mb-2.5 text-26 font-bold tracking-[-.045em] text-text sm:text-30">レシピ帳をつくりましょう</h1>
-        <p className="mb-6.5 text-14 leading-[1.85] text-text-secondary">家族や友人と共有するレシピ帳に名前をつけます。あとから設定画面で招待できます。</p>
+        <h1 className="mt-3 mb-2.5 text-26 font-bold tracking-[-.045em] text-text sm:text-30">レシピノートをつくりましょう</h1>
+        <p className="mb-6.5 text-14 leading-[1.85] text-text-secondary">家族や友人と共有するレシピノートに名前をつけます。</p>
         <form onSubmit={(event) => void handleSubmit(event)}>
-          <label className={fieldLabelClassName} htmlFor="group-name">レシピ帳の名前</label>
+          <label className={fieldLabelClassName} htmlFor="group-name">レシピノートの名前</label>
           <input id="group-name" className={textInputClassName({ size: 'tall' })} value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="例：我が家のレシピ" maxLength={50} autoFocus required />
           {error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
-          <Button className="mt-4.25 w-full" size="lg" type="submit" loading={isSubmitting}>レシピ帳を作成 <ArrowRight size={17} /></Button>
+          <Button className="mt-4.25 w-full" size="lg" type="submit" loading={isSubmitting}>レシピノートを作成 <ArrowRight size={17} /></Button>
         </form>
         <div className="mt-6.75 grid gap-2.25 border-t border-border pt-5 text-12 text-text-secondary">
           <div className="flex items-center gap-1.75"><UsersRound size={16} className="text-primary" /><span>あとからメンバーを招待できます</span></div>

@@ -47,7 +47,7 @@ export function JoinGroupPage() {
       await joinGroup(token)
       navigate('/recipes', { replace: true })
     } catch (joinError) {
-      setError(getErrorMessage(joinError, 'グループに参加できませんでした。'))
+      setError(getErrorMessage(joinError, 'レシピノートに参加できませんでした。'))
     } finally {
       setJoining(false)
     }
@@ -82,10 +82,10 @@ export function JoinGroupPage() {
           <div>
             <span className={eyebrowClassName}>YOU ARE INVITED</span>
             <h1 className="mt-3 mb-3.25 text-28 leading-[1.3] font-bold tracking-[-.045em] text-text sm:text-30">「{inviteGroup.name}」に<br /><em className="text-primary not-italic">参加しますか？</em></h1>
-            <p className="text-14 leading-[1.85] text-text-secondary">このレシピ帳のメンバーになると、みんなのレシピを見たり、新しい料理を追加できます。</p>
+            <p className="text-14 leading-[1.85] text-text-secondary">このレシピノートのメンバーになると、みんなのレシピを見たり、新しい料理を追加できます。</p>
             {error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
             {user ? (
-              <Button size="lg" className="mt-6 w-full" loading={joining} onClick={() => void handleJoin()}>レシピ帳に参加する <ArrowRight size={17} /></Button>
+              <Button size="lg" className="mt-6 w-full" loading={joining} onClick={() => void handleJoin()}>レシピノートに参加する <ArrowRight size={17} /></Button>
             ) : (
               <Link to={loginPath} state={{ from: location.pathname }} className={buttonClassName('primary', 'mt-6 w-full', 'lg')}>ログインして参加する <ArrowRight size={17} /></Link>
             )}
@@ -96,7 +96,6 @@ export function JoinGroupPage() {
           </div>
         ) : null}
       </div>
-      <p className="absolute bottom-7.5 hidden text-12 text-text-muted italic sm:block">あなたの料理の記録を、もっと身近に。</p>
     </div>
   )
 }

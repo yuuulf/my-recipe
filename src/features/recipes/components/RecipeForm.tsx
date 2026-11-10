@@ -50,7 +50,8 @@ const sectionClassName = 'mb-7.25 grid grid-cols-1 gap-3 border-b border-border 
 const sectionMarkerClassName = (tone: 'primary' | 'info' = 'primary') =>
   `grid size-7.75 place-items-center rounded-md sm:size-8.5 ${tone === 'info' ? 'bg-info-soft text-info' : 'bg-primary-soft text-primary'}`
 const sectionHeadingClassName = 'mt-1.25 mb-1.75 font-bold tracking-[-.03em] text-text'
-const sectionDescriptionClassName = 'mb-5.5 text-14 leading-[1.6] text-text-secondary'
+// Keeps the 22px gap between a section heading and its row editor.
+const sectionBodyClassName = 'mt-3.75'
 const numberInputClassName = (error: boolean) => `${textInputClassName({ error, fullWidth: false })} mt-1.75 block w-full sm:w-32.5`
 
 type RecipeFormProps = {
@@ -128,7 +129,6 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
         <div className={sectionMarkerClassName()}><BookOpen size={17} /></div>
         <div>
           <h1 className={`${sectionHeadingClassName} text-26 sm:text-28`}>料理の記録を残す</h1>
-          <p className={sectionDescriptionClassName}>あとから作りたくなるように、気軽にメモしておきましょう。</p>
           <label className={`${fieldLabelClassName} ${requiredMarkClassName}`}>料理名</label>
           <input className={textInputClassName({ error: Boolean(errors.title), size: 'title' })} placeholder="例：豚の生姜焼き" autoFocus {...register('title')} />
           {errors.title ? <span className={fieldErrorClassName}>{errors.title.message}</span> : null}
@@ -141,14 +141,15 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
         <div className={sectionMarkerClassName()}><FileText size={17} /></div>
         <div>
           <h2 className={`${sectionHeadingClassName} text-20`}>材料</h2>
-          <p className={sectionDescriptionClassName}>1行に1つずつ入力してください。</p>
-          <IngredientEditor
-            values={ingredientValues}
-            register={register}
-            onAppend={() => setValue('ingredients', [...ingredientValues, ''], { shouldDirty: true })}
-            onRemove={removeIngredient}
-            error={errors.ingredients?.message}
-          />
+          <div className={sectionBodyClassName}>
+            <IngredientEditor
+              values={ingredientValues}
+              register={register}
+              onAppend={() => setValue('ingredients', [...ingredientValues, ''], { shouldDirty: true })}
+              onRemove={removeIngredient}
+              error={errors.ingredients?.message}
+            />
+          </div>
         </div>
       </section>
 
@@ -156,14 +157,15 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
         <div className={sectionMarkerClassName()}><NotebookPen size={17} /></div>
         <div>
           <h2 className={`${sectionHeadingClassName} text-20`}>作り方</h2>
-          <p className={sectionDescriptionClassName}>順番に並べると、料理中にも見返しやすくなります。</p>
-          <StepEditor
-            values={stepValues}
-            register={register}
-            onAppend={() => setValue('steps', [...stepValues, ''], { shouldDirty: true })}
-            onRemove={removeStep}
-            error={errors.steps?.message}
-          />
+          <div className={sectionBodyClassName}>
+            <StepEditor
+              values={stepValues}
+              register={register}
+              onAppend={() => setValue('steps', [...stepValues, ''], { shouldDirty: true })}
+              onRemove={removeStep}
+              error={errors.steps?.message}
+            />
+          </div>
         </div>
       </section>
 
@@ -186,7 +188,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
           <label className={fieldLabelClassName}><Link2 size={15} /> 参考URL <span>任意</span></label>
           <input className={textInputClassName({ error: Boolean(errors.sourceUrl) })} type="url" placeholder="https://example.com/recipe" {...register('sourceUrl')} />
           {errors.sourceUrl ? <span className={fieldErrorClassName}>{errors.sourceUrl.message}</span> : null}
-          <label className={fieldLabelClassName}>自分用メモ <span>任意</span></label>
+          <label className={fieldLabelClassName}>メモ <span>任意</span></label>
           <textarea className={textInputClassName()} rows={4} placeholder="次に作るときのメモやアレンジなど" {...register('memo')} />
         </div>
       </section>

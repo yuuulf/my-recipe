@@ -6,7 +6,7 @@ import { buttonClassName } from '../components/buttonStyles'
 import { EmptyState } from '../components/EmptyState'
 import { PageLoader } from '../components/Loading'
 import { AppShell } from '../components/Layout/AppShell'
-import { alertErrorClassName, eyebrowClassName, pageHeaderClassName, pageLeadClassName, pageTitleClassName } from '../components/styles'
+import { alertErrorClassName, pageHeaderClassName, pageTitleClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { getRecipes } from '../features/recipes/api/recipes'
@@ -71,9 +71,7 @@ export function RecipeListPage() {
     <AppShell>
       <div className={`${pageHeaderClassName} mb-6.75 md:mb-7.5`}>
         <div>
-          <span className={eyebrowClassName}>{group?.name ?? 'レシピ帳'}</span>
           <h1 className={pageTitleClassName}>レシピ一覧</h1>
-          <p className={pageLeadClassName}>いつものごはんを、もっとおいしく、もっと楽しく。</p>
         </div>
         <Link to="/recipes/new" className={buttonClassName('primary', 'w-full whitespace-nowrap sm:w-auto')}><Plus size={18} /> レシピを追加</Link>
       </div>
@@ -112,7 +110,7 @@ export function RecipeListPage() {
         <EmptyState
           icon={<UtensilsCrossed size={25} />}
           title={query || selectedTag !== 'すべて' ? '見つかりませんでした' : 'まだレシピがありません'}
-          description={query || selectedTag !== 'すべて' ? '検索条件を変えて、もう一度お試しください。' : '最初のレシピを登録して、あなたのレシピ帳を始めましょう。'}
+          description={query || selectedTag !== 'すべて' ? '検索条件を変えて、もう一度お試しください。' : '最初のレシピを登録して、あなたのレシピノートを始めましょう。'}
         >
           {query || selectedTag !== 'すべて' ? (
             <Button variant="secondary" onClick={() => { setQuery(''); setSelectedTag('すべて') }}>絞り込みをリセット</Button>
