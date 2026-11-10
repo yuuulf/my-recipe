@@ -16,7 +16,7 @@ const footnoteClassName = 'mt-4.5 flex gap-1.5 text-12 leading-[1.6] text-text-m
 const inviteLinkBoxClassName = 'flex min-w-0 items-center gap-2 rounded-sm border border-border bg-surface-muted px-3 py-2.75 font-mono text-12 text-text-secondary'
 
 export function SettingsPage() {
-  const { group, members, signOut, user, isDemoMode, isDemoUser } = useApp()
+  const { group, members, signOut, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
   const inviteUrl = isDemoUser
@@ -58,7 +58,6 @@ export function SettingsPage() {
           <div className={detailRowClassName}><span>オーナー</span><strong>{members.find((member) => member.role === 'owner') ? getMemberDisplayName(members.find((member) => member.role === 'owner')!, user) : user?.displayName}</strong></div>
           <div className={detailRowClassName}><span>メンバー数</span><strong>{members.length}人</strong></div>
           {isDemoUser ? <p className={footnoteClassName}><ShieldCheck size={14} /> デモモードの固定データを表示しています。</p> : null}
-          {!isDemoUser && isDemoMode ? <p className={footnoteClassName}><ShieldCheck size={14} /> ローカルプレビューのデータはこのブラウザに保存されます。</p> : null}
         </section>
 
         <section className={cardClassName}>

@@ -1,10 +1,10 @@
-import { ArrowRight, BookOpen, Mail, Search, UsersRound } from 'lucide-react'
+import { ArrowRight, BookOpen, Search, UsersRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { BrandLockup } from '../components/BrandLockup'
 import { Button } from '../components/Button'
 import { PageLoader } from '../components/Loading'
-import { alertErrorClassName, fieldLabelClassName } from '../components/styles'
+import { alertErrorClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 
@@ -61,12 +61,9 @@ export function LoginPage() {
     authReady,
     isDemoUser,
     signInWithGoogle,
-    signInLocal,
-    isDemoMode,
     enterDemo,
   } = useApp()
   const location = useLocation()
-  const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const googleSignInStartedRef = useRef(false)
@@ -90,19 +87,6 @@ export function LoginPage() {
     window.addEventListener('pageshow', handlePageShow)
     return () => window.removeEventListener('pageshow', handlePageShow)
   }, [])
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setError('')
-    setIsSubmitting(true)
-    try {
-      await signInLocal(email)
-    } catch (submitError) {
-      setError(getErrorMessage(submitError, 'ログインできませんでした。'))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const handleGoogleSignIn = async () => {
     setError('')
@@ -131,29 +115,15 @@ export function LoginPage() {
       <main className="relative z-1 w-[min(470px,100%)] rounded-lg border border-border bg-white/96 px-5.5 py-7.5 shadow-md sm:p-10.5">
         <div>
           <h1 className="mb-2.5 text-28 font-bold tracking-[-.04em] text-text sm:text-30">レシピノートをひらく</h1>
-          <p className="text-14 leading-[1.8] text-text-secondary">{isDemoMode ? 'ローカルプレビューです。メールアドレスを入力すると、このブラウザですぐにログインできます。' : 'Googleアカウントでログインして、レシピノートをひらきます。'}</p>
+          <p className="text-14 leading-[1.8] text-text-secondary">Googleアカウントでログインして、レシピノートをひらきます。</p>
         </div>
 
-        {isDemoMode ? (
-          <form className="mt-7.75" onSubmit={(event) => void handleSubmit(event)}>
-            <label className={fieldLabelClassName} htmlFor="login-email">メールアドレス</label>
-            <div className="flex items-center gap-2.25 rounded-md border border-border px-3.25 text-text-muted focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/10">
-              <Mail size={18} aria-hidden="true" />
-              <input id="login-email" className="min-h-11.5 w-full border-0 bg-transparent text-14 text-text outline-none" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" required />
-            </div>
-            {error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
-            <Button type="submit" className="mt-4.25 w-full" loading={isSubmitting}>
-              ログイン <ArrowRight size={17} />
-            </Button>
-          </form>
-        ) : (
-          <div className="mt-7.75">
-            {displayedError ? <div className={alertErrorClassName} role="alert">{displayedError}</div> : null}
-            <Button type="button" variant="secondary" size="xl" className="mt-4.25 w-full" loading={isSubmitting} onClick={() => void handleGoogleSignIn()}>
-              {isSubmitting ? null : <GoogleIcon />} Googleでログイン
-            </Button>
-          </div>
-        )}
+        <div className="mt-7.75">
+          {displayedError ? <div className={alertErrorClassName} role="alert">{displayedError}</div> : null}
+          <Button type="button" variant="secondary" size="xl" className="mt-4.25 w-full" loading={isSubmitting} onClick={() => void handleGoogleSignIn()}>
+            {isSubmitting ? null : <GoogleIcon />} Googleでログイン
+          </Button>
+        </div>
 
         <div className="mt-10.5 flex items-center gap-3 text-12 text-text-muted before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border sm:mt-12"><span>はじめて使う方へ</span></div>
         <p className="mt-3.25 mb-3 text-center text-13 text-text-muted">ログイン後に、あなたのレシピノートを作成できます。</p>

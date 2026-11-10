@@ -1,15 +1,8 @@
 import {
-  localCreateRecipe,
-  localDeleteRecipe,
-  localGetRecipe,
-  localGetRecipes,
-  localUpdateRecipe,
-} from '../../../lib/localStorage'
-import {
   getDemoRecipe,
   getDemoRecipes,
 } from '../../../lib/demoData'
-import { supabase } from '../../../lib/supabase'
+import { getSupabase } from '../../../lib/supabase'
 import type { Recipe, RecipeFormValues } from '../../../types/database'
 
 const cleanList = (values: string[]) => values.map((value) => value.trim()).filter(Boolean)
@@ -46,7 +39,7 @@ export const recipeToFormValues = (recipe: Recipe): RecipeFormValues => ({
 
 export const getRecipes = async (groupId: string, query = '', isDemoUser = false): Promise<Recipe[]> => {
   if (isDemoUser) return getDemoRecipes(query)
-  if (!supabase) return localGetRecipes(groupId, query)
+  const supabase = getSupabase()
 
   if (query.trim()) {
     const { data, error } = await supabase.rpc('search_recipes', {
@@ -68,8 +61,7 @@ export const getRecipes = async (groupId: string, query = '', isDemoUser = false
 
 export const getRecipe = async (id: string, isDemoUser = false): Promise<Recipe | null> => {
   if (isDemoUser) return getDemoRecipe(id)
-  if (!supabase) return localGetRecipe(id)
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('recipes')
     .select('*')
     .eq('id', id)
@@ -86,18 +78,7 @@ export const createRecipe = async (
 ): Promise<Recipe> => {
   if (isDemoUser) throw new Error('デモモードではレシピを保存できません。')
   const payload = formToPayload(values, groupId, userId)
-  if (!supabase) {
-    const createdAt = new Date().toISOString()
-    return localCreateRecipe({
-      ...payload,
-      id: `recipe-${crypto.randomUUID()}`,
-      updated_by: userId,
-      created_at: createdAt,
-      updated_at: createdAt,
-    })
-  }
-
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('recipes')
     .insert(payload)
     .select('*')
@@ -127,8 +108,7 @@ export const updateRecipe = async (
     updated_by: userId,
   }
 
-  if (!supabase) return localUpdateRecipe(id, updates)
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('recipes')
     .update(updates)
     .eq('id', id)
@@ -140,10 +120,6 @@ export const updateRecipe = async (
 
 export const deleteRecipe = async (id: string, isDemoUser = false): Promise<void> => {
   if (isDemoUser) throw new Error('デモモードではレシピを削除できません。')
-  if (!supabase) {
-    localDeleteRecipe(id)
-    return
-  }
-  const { error } = await supabase.from('recipes').delete().eq('id', id)
+  const { error } = await getSupabase().from('recipes').delete().eq('id', id)
   if (error) throw error
 }

@@ -16,3 +16,10 @@ export const supabase = isSupabaseConfigured
       },
     })
   : null
+
+// Returns the client. Without connection settings the app shows the setup page
+// instead of these screens, so this error is not expected in normal use.
+export const getSupabase = () => {
+  if (!supabase) throw new Error('Supabaseの接続設定がありません。')
+  return supabase
+}
