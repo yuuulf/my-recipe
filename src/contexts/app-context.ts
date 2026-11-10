@@ -3,6 +3,9 @@ import type { AppUser, Group, GroupMember } from '../types/database'
 
 export type AppContextValue = {
   user: AppUser | null
+  // Every recipe note the user belongs to, oldest membership first.
+  groups: Group[]
+  // The open recipe note.
   group: Group | null
   members: GroupMember[]
   authReady: boolean
@@ -14,6 +17,7 @@ export type AppContextValue = {
   createGroup: (name: string) => Promise<Group>
   joinGroup: (inviteToken: string) => Promise<Group>
   refreshGroup: () => Promise<void>
+  selectGroup: (groupId: string) => Promise<void>
 }
 
 export const AppContext = createContext<AppContextValue | null>(null)

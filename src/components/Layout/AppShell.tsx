@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../../contexts/app-context'
+import { RecipeNoteSwitcher } from '../../features/groups/components/RecipeNoteSwitcher'
 import { BrandLockup } from '../BrandLockup'
 import { eyebrowClassName, iconButtonClassName } from '../styles'
 
@@ -25,7 +26,7 @@ const mobileNavItemClassName = (isActive: boolean) =>
   `flex flex-1 flex-col items-center justify-center gap-0.75 text-12 font-bold ${isActive ? 'text-primary' : 'text-text-muted'}`
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { group, user, signOut, isDemoUser } = useApp()
+  const { user, signOut, isDemoUser } = useApp()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -38,12 +39,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="fixed inset-y-0 left-0 z-5 hidden w-55 flex-col border-r border-border bg-surface px-4 pt-6 pb-4.5 md:flex xl:w-58">
         <BrandLockup variant="full" />
 
-        <div className="mx-1 mt-10.5 mb-6.25">
-          <span className={`${eyebrowClassName} mb-2.5`}>選択中のレシピノート</span>
-          <div className="flex items-center gap-2.25 text-14 font-bold text-text">
-            <span className="grid size-7 flex-none place-items-center rounded-md bg-primary-soft text-12 font-extrabold text-primary">{group?.name.slice(0, 1) ?? '？'}</span>
-            <span>{group?.name ?? 'レシピノート未設定'}</span>
-          </div>
+        <div className="mt-10.5 mb-6.25">
+          <span className={`${eyebrowClassName} mb-1.5 px-1`}>選択中のレシピノート</span>
+          <RecipeNoteSwitcher variant="sidebar" />
         </div>
 
         <nav className="grid gap-1" aria-label="メインメニュー">
@@ -96,11 +94,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="min-h-screen w-full min-w-0 md:ml-55 md:w-[calc(100%-220px)] xl:ml-58 xl:w-[calc(100%-232px)]">
-        <header className="flex items-center justify-between border-b border-border bg-surface px-4.5 py-3.25 md:hidden">
-          <BrandLockup variant="header" />
-          <NavLink to="/settings" className={iconButtonClassName()} aria-label="設定">
-            <Settings size={19} />
-          </NavLink>
+        {/* Settings opens from the bottom menu, so the header shows the open recipe note instead. */}
+        <header className="flex items-center justify-between gap-3 border-b border-border bg-surface px-4.5 py-3.25 md:hidden">
+          <BrandLockup variant="header" className="flex-none" />
+          <RecipeNoteSwitcher variant="header" />
         </header>
         <main className="mx-auto w-[min(1180px,100%)] px-4 pt-6 pb-24.25 sm:px-5 sm:pt-6.75 sm:pb-25 md:px-8 md:pt-9.5 md:pb-17.5 xl:px-12 xl:pt-10.5 xl:pb-19.5">{children}</main>
         <nav className="fixed inset-x-0 bottom-0 z-10 flex min-h-16 justify-around border-t border-border bg-white/97 px-4 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] backdrop-blur-[9px] md:hidden" aria-label="モバイルメニュー">
