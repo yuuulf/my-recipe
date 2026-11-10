@@ -115,6 +115,15 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
     setValue('steps', next.length ? next : [''], { shouldDirty: true })
   }
 
+  // Swaps two rows. The editors only offer moves to an existing neighbor row.
+  const moveRow = (name: 'ingredients' | 'steps', from: number, to: number) => {
+    const values = name === 'ingredients' ? ingredientValues : stepValues
+    if (to < 0 || to >= values.length) return
+    const next = [...values]
+    ;[next[from], next[to]] = [next[to], next[from]]
+    setValue(name, next, { shouldDirty: true })
+  }
+
   return (
     <form className="mx-auto max-w-210" onSubmit={(event) => void handleSubmit(submit)(event)}>
       <div className="mb-7.5 flex items-center justify-between gap-5 sm:mb-9">
@@ -147,6 +156,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
               register={register}
               onAppend={() => setValue('ingredients', [...ingredientValues, ''], { shouldDirty: true })}
               onRemove={removeIngredient}
+              onMove={(from, to) => moveRow('ingredients', from, to)}
               error={errors.ingredients?.message}
             />
           </div>
@@ -163,6 +173,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
               register={register}
               onAppend={() => setValue('steps', [...stepValues, ''], { shouldDirty: true })}
               onRemove={removeStep}
+              onMove={(from, to) => moveRow('steps', from, to)}
               error={errors.steps?.message}
             />
           </div>
