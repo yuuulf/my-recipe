@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../components/Layout/AppShell'
 import { PageLoader } from '../components/Loading'
+import { alertErrorClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { getRecipe, recipeToFormValues, updateRecipe } from '../features/recipes/api/recipes'
@@ -36,7 +37,7 @@ export function RecipeEditPage() {
   return (
     <AppShell>
       {loading ? <PageLoader label="レシピを読み込んでいます…" /> : null}
-      {!loading && error ? <div className="alert error" role="alert">{error}</div> : null}
+      {!loading && error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
       {!loading && values && id ? (
         <RecipeForm
           defaultValues={values}

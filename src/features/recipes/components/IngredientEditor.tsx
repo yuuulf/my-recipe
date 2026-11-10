@@ -1,6 +1,8 @@
 import { Minus, Plus } from 'lucide-react'
 import type { UseFormRegister } from 'react-hook-form'
+import { fieldErrorClassName, textInputClassName } from '../../../components/styles'
 import type { RecipeFormValues } from '../../../types/database'
+import { addRowButtonClassName, editorListClassName, removeRowButtonClassName } from './editorStyles'
 
 type EditorProps = {
   values: string[]
@@ -13,19 +15,19 @@ type EditorProps = {
 
 export function IngredientEditor({ values, register, onAppend, onRemove, error, disabled = false }: EditorProps) {
   return (
-    <div className="editor-list">
+    <div className={editorListClassName}>
       {values.map((_value, index) => (
-        <div className="editor-row" key={`ingredient-${index}`}>
-          <span className="editor-index">{String(index + 1).padStart(2, '0')}</span>
+        <div className="flex items-center gap-2.25" key={`ingredient-${index}`}>
+          <span className="w-6.5 text-center text-12 text-text-muted tabular-nums">{String(index + 1).padStart(2, '0')}</span>
           <input
-            className="text-input"
+            className={`${textInputClassName()} flex-1`}
             disabled={disabled}
             placeholder={index === 0 ? '例：豚ロース薄切り 300g' : '材料を入力'}
             {...register(`ingredients.${index}`)}
           />
           <button
             type="button"
-            className="remove-button"
+            className={removeRowButtonClassName}
             disabled={disabled}
             onClick={() => onRemove(index)}
             aria-label={`材料${index + 1}を削除`}
@@ -34,10 +36,10 @@ export function IngredientEditor({ values, register, onAppend, onRemove, error, 
           </button>
         </div>
       ))}
-      <button type="button" className="add-row-button" disabled={disabled} onClick={onAppend}>
+      <button type="button" className={addRowButtonClassName} disabled={disabled} onClick={onAppend}>
         <Plus size={16} /> 材料を追加
       </button>
-      {error ? <span className="field-error">{error}</span> : null}
+      {error ? <span className={fieldErrorClassName}>{error}</span> : null}
     </div>
   )
 }

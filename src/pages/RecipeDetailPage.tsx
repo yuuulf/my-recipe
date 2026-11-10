@@ -2,8 +2,11 @@ import { ArrowLeft, Clock3, Edit3, ExternalLink, FileText, MoreHorizontal, Noteb
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
+import { buttonClassName } from '../components/buttonStyles'
+import { EmptyState } from '../components/EmptyState'
 import { PageLoader } from '../components/Loading'
 import { AppShell } from '../components/Layout/AppShell'
+import { backLinkClassName, eyebrowClassName, iconButtonClassName, tagClassName, tagRowClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { deleteRecipe, getRecipe } from '../features/recipes/api/recipes'
@@ -14,6 +17,20 @@ const formatDate = (value: string) => new Intl.DateTimeFormat('ja-JP', {
   month: 'long',
   day: 'numeric',
 }).format(new Date(value))
+
+const sectionHeadingClassName = 'flex items-start gap-2.5'
+const sectionNumberClassName = 'text-14 leading-[1.4] text-text-muted tabular-nums'
+const sectionTitleClassName = 'text-20 font-bold tracking-[-.025em] text-text'
+// Paragraphs here used the browser's default 1em margin before Preflight.
+const mutedCopyClassName = 'my-3.5 text-14 text-text-secondary'
+const iconTextClassName = 'inline-flex items-center gap-1.5'
+const noteCardClassName = 'min-h-27.5 rounded-lg border border-border bg-surface-muted px-4.5 py-4.25 shadow-sm'
+const noteHeadingClassName = 'flex items-center gap-1.75 text-14 font-bold text-primary'
+const stepItemClassName = [
+  'relative grid min-h-15 grid-cols-[35px_minmax(0,1fr)] gap-3.25',
+  // The line that joins each step number to the next.
+  'not-last:before:absolute not-last:before:top-6.75 not-last:before:-bottom-1 not-last:before:left-3 not-last:before:w-px not-last:before:bg-border',
+].join(' ')
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -65,70 +82,71 @@ export function RecipeDetailPage() {
     <AppShell>
       {loading ? <PageLoader label="レシピを開いています…" /> : null}
       {!loading && (error || !recipe) ? (
-        <div className="detail-not-found">
-          <div className="empty-state">
-            <div className="empty-icon"><FileText size={25} /></div>
-            <h2>{error || 'レシピが見つかりません'}</h2>
-            <p>削除されたか、アクセスできないレシピの可能性があります。</p>
-            <Link to="/recipes" className="button button-secondary"><ArrowLeft size={16} /> 一覧に戻る</Link>
-          </div>
+        <div className="mx-auto my-17.5 max-w-162.5">
+          <EmptyState
+            icon={<FileText size={25} />}
+            title={error || 'レシピが見つかりません'}
+            description="削除されたか、アクセスできないレシピの可能性があります。"
+          >
+            <Link to="/recipes" className={buttonClassName('secondary')}><ArrowLeft size={16} /> 一覧に戻る</Link>
+          </EmptyState>
         </div>
       ) : null}
       {!loading && recipe ? (
-        <article className="recipe-detail">
-          <div className="detail-toolbar">
-            <Link to="/recipes" className="back-link"><ArrowLeft size={17} /> レシピ一覧</Link>
-            <div className="detail-actions">
-              <Link to={`/recipes/${recipe.id}/edit`} className="button button-secondary"><Edit3 size={16} /> 編集</Link>
-              {!isDemoUser ? <button type="button" className="icon-button danger-icon" onClick={() => setShowDeleteConfirm(true)} aria-label="レシピを削除" title="削除"><Trash2 size={17} /></button> : null}
-              {!isDemoUser ? <button type="button" className="icon-button more-button" aria-label="その他の操作"><MoreHorizontal size={18} /></button> : null}
+        <article>
+          <div className="mb-6.5 flex items-center justify-between gap-5 sm:mb-7.5">
+            <Link to="/recipes" className={backLinkClassName}><ArrowLeft size={17} /> レシピ一覧</Link>
+            <div className="flex gap-2">
+              <Link to={`/recipes/${recipe.id}/edit`} className={buttonClassName('secondary', '', 'compact')}><Edit3 size={16} /> 編集</Link>
+              {!isDemoUser ? <button type="button" className={iconButtonClassName({ variant: 'danger', tall: true })} onClick={() => setShowDeleteConfirm(true)} aria-label="レシピを削除" title="削除"><Trash2 size={17} /></button> : null}
+              {!isDemoUser ? <button type="button" className={`${iconButtonClassName({ tall: true })} sm:hidden`} aria-label="その他の操作"><MoreHorizontal size={18} /></button> : null}
             </div>
           </div>
-          <header className="detail-hero">
-            <div className="detail-hero-copy">
-              <span className="eyebrow">最終更新 {formatDate(recipe.updated_at)}</span>
-              <h1>{recipe.title}</h1>
-              {recipe.description ? <p>{recipe.description}</p> : null}
-              <div className="detail-meta-row">
-                {recipe.cooking_time_minutes ? <span><Clock3 size={17} /> {recipe.cooking_time_minutes}分</span> : null}
-                {recipe.servings ? <span><UsersRound size={17} /> {recipe.servings}人分</span> : null}
-                <span><NotebookPen size={17} /> {recipe.steps.length}ステップ</span>
+          <header className="flex justify-between gap-7.5 border-b border-border pb-6.75 sm:pb-7.5">
+            <div className="min-w-0">
+              <span className={eyebrowClassName}>最終更新 {formatDate(recipe.updated_at)}</span>
+              <h1 className="mt-2.75 mb-2.25 text-30 leading-[1.2] font-bold tracking-[-.04em] text-text sm:text-[clamp(28px,4vw,38px)]">{recipe.title}</h1>
+              {recipe.description ? <p className="text-15 leading-[1.6] text-text-secondary">{recipe.description}</p> : null}
+              <div className="mt-4.75 flex flex-wrap gap-3.75 text-14 text-text-secondary">
+                {recipe.cooking_time_minutes ? <span className={iconTextClassName}><Clock3 className="text-primary" size={17} /> {recipe.cooking_time_minutes}分</span> : null}
+                {recipe.servings ? <span className={iconTextClassName}><UsersRound className="text-primary" size={17} /> {recipe.servings}人分</span> : null}
+                <span className={iconTextClassName}><NotebookPen className="text-primary" size={17} /> {recipe.steps.length}ステップ</span>
               </div>
-              {recipe.tags.length ? <div className="tag-row detail-tags">{recipe.tags.map((tag) => <span className="tag" key={tag}>#{tag}</span>)}</div> : null}
+              {recipe.tags.length ? <div className={`${tagRowClassName} mt-4`}>{recipe.tags.map((tag) => <span className={tagClassName} key={tag}>#{tag}</span>)}</div> : null}
             </div>
-            <div className="detail-number" aria-hidden="true"><span>NO.</span><strong>#{String(recipe.id).slice(-2).toUpperCase()}</strong></div>
+            <div className="hidden flex-none flex-col items-end justify-end text-text-muted sm:flex" aria-hidden="true"><span className="text-11 tracking-[.08em]">NO.</span><strong className="text-38 leading-none font-bold text-border-strong">#{String(recipe.id).slice(-2).toUpperCase()}</strong></div>
           </header>
 
-          <div className="detail-content-grid">
-            <section className="detail-section ingredients-section">
-              <div className="detail-section-heading"><span className="section-number">01</span><div><h2>材料</h2></div></div>
-              {recipe.ingredients.length ? <ul className="ingredient-list">{recipe.ingredients.map((ingredient, index) => <li key={`${ingredient}-${index}`}><span className="check-circle" /> <span>{ingredient}</span></li>)}</ul> : <p className="muted-copy">材料の記録はありません。</p>}
+          <div className="grid grid-cols-1 gap-7.25 border-b border-border pt-7.25 pb-7.75 sm:gap-8.75 sm:pt-8.5 sm:pb-9.5 md:grid-cols-[.82fr_1.18fr] md:gap-11">
+            <section>
+              <div className={sectionHeadingClassName}><span className={sectionNumberClassName}>01</span><div><h2 className={sectionTitleClassName}>材料</h2></div></div>
+              {recipe.ingredients.length ? <ul className="mt-6 grid gap-3">{recipe.ingredients.map((ingredient, index) => <li className="flex items-start gap-2.5 text-14 leading-[1.55] text-text-secondary" key={`${ingredient}-${index}`}><span className="mt-0.5 size-3.75 flex-none rounded-full border border-primary/40" /> <span>{ingredient}</span></li>)}</ul> : <p className={mutedCopyClassName}>材料の記録はありません。</p>}
             </section>
 
-            <section className="detail-section steps-section">
-              <div className="detail-section-heading"><span className="section-number">02</span><div><h2>作り方</h2></div></div>
-              {recipe.steps.length ? <ol className="steps-list">{recipe.steps.map((step, index) => <li key={`${step}-${index}`}><span className="step-list-number">{String(index + 1).padStart(2, '0')}</span><p>{step}</p></li>)}</ol> : <p className="muted-copy">作り方の記録はありません。</p>}
+            <section>
+              <div className={sectionHeadingClassName}><span className={sectionNumberClassName}>02</span><div><h2 className={sectionTitleClassName}>作り方</h2></div></div>
+              {recipe.steps.length ? <ol className="mt-5 grid">{recipe.steps.map((step, index) => <li className={stepItemClassName} key={`${step}-${index}`}><span className="z-1 grid size-6.25 place-items-center rounded-full bg-primary-soft text-11 font-extrabold text-primary">{String(index + 1).padStart(2, '0')}</span><p className="mt-0.5 text-14 leading-[1.7] text-text-secondary">{step}</p></li>)}</ol> : <p className={mutedCopyClassName}>作り方の記録はありません。</p>}
             </section>
           </div>
 
           {(recipe.memo || recipe.source_url) ? (
-            <div className="detail-notes-grid">
-              {recipe.memo ? <section className="note-card memo-card"><div className="note-card-heading"><NotebookPen size={17} /><span>メモ</span></div><p>{recipe.memo}</p></section> : null}
-              {recipe.source_url ? <section className="note-card source-card"><div className="note-card-heading"><ExternalLink size={17} /><span>参考URL</span></div><a href={recipe.source_url} target="_blank" rel="noreferrer">{recipe.source_url}<ExternalLink size={14} /></a></section> : null}
+            <div className="grid grid-cols-1 gap-2.5 py-5.25 sm:grid-cols-2 sm:gap-3.5 sm:py-6.5">
+              {recipe.memo ? <section className={noteCardClassName}><div className={noteHeadingClassName}><NotebookPen size={17} /><span>メモ</span></div><p className="mt-3 text-14 leading-[1.7] text-text-secondary">{recipe.memo}</p></section> : null}
+              {recipe.source_url ? <section className={noteCardClassName}><div className={noteHeadingClassName}><ExternalLink size={17} /><span>参考URL</span></div><a className="mt-3 flex items-center gap-1.75 overflow-hidden text-13 text-ellipsis whitespace-nowrap text-primary-hover underline" href={recipe.source_url} target="_blank" rel="noreferrer">{recipe.source_url}<ExternalLink className="flex-none" size={14} /></a></section> : null}
             </div>
           ) : null}
 
-          <footer className="detail-footer"><span>登録者 {user?.displayName || 'メンバー'}</span><span>最終更新 {formatDate(recipe.updated_at)}</span></footer>
+          <footer className="flex flex-col gap-1.25 pt-1 text-12 text-text-muted sm:flex-row sm:gap-4.5"><span>登録者 {user?.displayName || 'メンバー'}</span><span>最終更新 {formatDate(recipe.updated_at)}</span></footer>
         </article>
       ) : null}
 
       {showDeleteConfirm ? (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowDeleteConfirm(false) }}>
-          <div className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-title">
-            <div className="confirm-icon"><Trash2 size={20} /></div>
-            <h2 id="delete-title">レシピを削除しますか？</h2>
-            <p>「{recipe?.title}」を削除すると、元に戻せません。</p>
-            <div className="confirm-actions"><Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>キャンセル</Button><Button variant="danger" loading={deleting} onClick={() => void handleDelete()}>削除する</Button></div>
+        <div className="fixed inset-0 z-20 grid place-items-center bg-text/38 p-5 backdrop-blur-[3px]" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowDeleteConfirm(false) }}>
+          <div className="w-full max-w-97.5 rounded-lg bg-surface p-7 text-center shadow-md" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+            <div className="mx-auto mb-3.5 grid size-10.5 place-items-center rounded-md bg-danger-soft text-danger"><Trash2 size={20} /></div>
+            <h2 id="delete-title" className="mb-1.75 text-20 font-bold text-text">レシピを削除しますか？</h2>
+            <p className="text-14 text-text-secondary">「{recipe?.title}」を削除すると、元に戻せません。</p>
+            <div className="mt-5.75 flex justify-center gap-2"><Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>キャンセル</Button><Button variant="danger" loading={deleting} onClick={() => void handleDelete()}>削除する</Button></div>
           </div>
         </div>
       ) : null}

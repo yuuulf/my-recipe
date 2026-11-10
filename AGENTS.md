@@ -9,7 +9,8 @@ My Recipe is a React 19, TypeScript, and Vite application for shared recipe mana
 - `src/components/`: shared UI; `src/contexts/`: application state.
 - `src/lib/`: Supabase setup, localStorage persistence, demo data, and error helpers.
 - `src/types/database.ts`: shared database and form types.
-- `src/assets/` and `public/`: bundled images and static assets; global styles live in `src/index.css` and `src/App.css`.
+- `src/assets/` and `public/`: bundled images and static assets.
+- Styling uses Tailwind CSS v4. The theme (`@theme`) and global base styles live in `src/index.css`; shared class names live in `src/components/styles.ts` and `src/components/buttonStyles.ts`.
 - `supabase/migrations/`: ordered SQL migrations; `docs/`: implementation and design plans.
 
 ## Build, Test, and Development Commands

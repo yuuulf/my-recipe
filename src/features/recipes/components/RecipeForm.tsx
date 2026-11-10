@@ -5,6 +5,15 @@ import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
 import { Button } from '../../../components/Button'
+import { buttonClassName } from '../../../components/buttonStyles'
+import {
+  alertErrorClassName,
+  backLinkClassName,
+  fieldErrorClassName,
+  fieldLabelClassName,
+  requiredMarkClassName,
+  textInputClassName,
+} from '../../../components/styles'
 import { getErrorMessage } from '../../../lib/errors'
 import type { RecipeFormValues } from '../../../types/database'
 import { IngredientEditor } from './IngredientEditor'
@@ -36,6 +45,13 @@ const fallbackValues: RecipeFormValues = {
   sourceUrl: '',
   memo: '',
 }
+
+const sectionClassName = 'mb-7.25 grid grid-cols-1 gap-3 border-b border-border pb-7.75 sm:mb-9 sm:grid-cols-[36px_minmax(0,1fr)] sm:gap-4.5 sm:pb-10'
+const sectionMarkerClassName = (tone: 'primary' | 'info' = 'primary') =>
+  `grid size-7.75 place-items-center rounded-md sm:size-8.5 ${tone === 'info' ? 'bg-info-soft text-info' : 'bg-primary-soft text-primary'}`
+const sectionHeadingClassName = 'mt-1.25 mb-1.75 font-bold tracking-[-.03em] text-text'
+const sectionDescriptionClassName = 'mb-5.5 text-14 leading-[1.6] text-text-secondary'
+const numberInputClassName = (error: boolean) => `${textInputClassName({ error, fullWidth: false })} mt-1.75 block w-full sm:w-32.5`
 
 type RecipeFormProps = {
   defaultValues?: RecipeFormValues
@@ -99,33 +115,33 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
   }
 
   return (
-    <form className="recipe-form" onSubmit={(event) => void handleSubmit(submit)(event)}>
-      <div className="form-topbar">
-        <Link to="/recipes" className="back-link"><ArrowLeft size={17} /> 一覧に戻る</Link>
-        <Button type="submit" loading={isSaving} disabled={disableSave}>{submitLabel}</Button>
+    <form className="mx-auto max-w-210" onSubmit={(event) => void handleSubmit(submit)(event)}>
+      <div className="mb-7.5 flex items-center justify-between gap-5 sm:mb-9">
+        <Link to="/recipes" className={backLinkClassName}><ArrowLeft size={17} /> 一覧に戻る</Link>
+        <Button type="submit" size="compact-short" loading={isSaving} disabled={disableSave}>{submitLabel}</Button>
       </div>
 
-      {disableSave ? <div className="demo-readonly-banner" role="note">デモモードではレシピを閲覧・編集できますが、変更は保存できません。</div> : null}
-      {submitError ? <div className="alert error" role="alert">{submitError}</div> : null}
+      {disableSave ? <div className="mb-6 rounded-md border border-primary/20 bg-primary-soft px-3.25 py-2.75 text-13 leading-[1.6] text-primary-hover" role="note">デモモードではレシピを閲覧・編集できますが、変更は保存できません。</div> : null}
+      {submitError ? <div className={alertErrorClassName} role="alert">{submitError}</div> : null}
 
-      <section className="form-section intro-section">
-        <div className="section-marker"><BookOpen size={17} /></div>
-        <div className="section-body">
-          <h1>料理の記録を残す</h1>
-          <p className="section-description">あとから作りたくなるように、気軽にメモしておきましょう。</p>
-          <label className="field-label required">料理名</label>
-          <input className={`text-input title-input ${errors.title ? 'has-error' : ''}`} placeholder="例：豚の生姜焼き" autoFocus {...register('title')} />
-          {errors.title ? <span className="field-error">{errors.title.message}</span> : null}
-          <label className="field-label">ひとこと説明 <span>任意</span></label>
-          <textarea className="text-input" rows={3} placeholder="料理の特徴や、作るきっかけなど" {...register('description')} />
+      <section className={sectionClassName}>
+        <div className={sectionMarkerClassName()}><BookOpen size={17} /></div>
+        <div>
+          <h1 className={`${sectionHeadingClassName} text-26 sm:text-28`}>料理の記録を残す</h1>
+          <p className={sectionDescriptionClassName}>あとから作りたくなるように、気軽にメモしておきましょう。</p>
+          <label className={`${fieldLabelClassName} ${requiredMarkClassName}`}>料理名</label>
+          <input className={textInputClassName({ error: Boolean(errors.title), size: 'title' })} placeholder="例：豚の生姜焼き" autoFocus {...register('title')} />
+          {errors.title ? <span className={fieldErrorClassName}>{errors.title.message}</span> : null}
+          <label className={fieldLabelClassName}>ひとこと説明 <span>任意</span></label>
+          <textarea className={textInputClassName()} rows={3} placeholder="料理の特徴や、作るきっかけなど" {...register('description')} />
         </div>
       </section>
 
-      <section className="form-section">
-        <div className="section-marker orange"><FileText size={17} /></div>
-        <div className="section-body">
-          <h2>材料</h2>
-          <p className="section-description">1行に1つずつ入力してください。</p>
+      <section className={sectionClassName}>
+        <div className={sectionMarkerClassName()}><FileText size={17} /></div>
+        <div>
+          <h2 className={`${sectionHeadingClassName} text-20`}>材料</h2>
+          <p className={sectionDescriptionClassName}>1行に1つずつ入力してください。</p>
           <IngredientEditor
             values={ingredientValues}
             register={register}
@@ -136,11 +152,11 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
         </div>
       </section>
 
-      <section className="form-section">
-        <div className="section-marker green"><NotebookPen size={17} /></div>
-        <div className="section-body">
-          <h2>作り方</h2>
-          <p className="section-description">順番に並べると、料理中にも見返しやすくなります。</p>
+      <section className={sectionClassName}>
+        <div className={sectionMarkerClassName()}><NotebookPen size={17} /></div>
+        <div>
+          <h2 className={`${sectionHeadingClassName} text-20`}>作り方</h2>
+          <p className={sectionDescriptionClassName}>順番に並べると、料理中にも見返しやすくなります。</p>
           <StepEditor
             values={stepValues}
             register={register}
@@ -151,32 +167,32 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
         </div>
       </section>
 
-      <section className="form-section">
-        <div className="section-marker blue"><Clock3 size={17} /></div>
-        <div className="section-body">
-          <h2>料理のメモ</h2>
-          <div className="two-column-fields">
-            <label className="field-label">調理時間 <span>分</span>
-              <input className={`text-input compact-input ${errors.cookingTimeMinutes ? 'has-error' : ''}`} type="number" min="1" placeholder="20" {...register('cookingTimeMinutes', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
-              {errors.cookingTimeMinutes ? <small className="field-error">{errors.cookingTimeMinutes.message}</small> : null}
+      <section className={sectionClassName}>
+        <div className={sectionMarkerClassName('info')}><Clock3 size={17} /></div>
+        <div>
+          <h2 className={`${sectionHeadingClassName} text-20`}>料理のメモ</h2>
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+            <label className={fieldLabelClassName}>調理時間 <span>分</span>
+              <input className={numberInputClassName(Boolean(errors.cookingTimeMinutes))} type="number" min="1" placeholder="20" {...register('cookingTimeMinutes', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
+              {errors.cookingTimeMinutes ? <small className={`${fieldErrorClassName} font-[450]`}>{errors.cookingTimeMinutes.message}</small> : null}
             </label>
-            <label className="field-label">人数 <span>人分</span>
-              <input className={`text-input compact-input ${errors.servings ? 'has-error' : ''}`} type="number" min="1" placeholder="2" {...register('servings', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
-              {errors.servings ? <small className="field-error">{errors.servings.message}</small> : null}
+            <label className={fieldLabelClassName}>人数 <span>人分</span>
+              <input className={numberInputClassName(Boolean(errors.servings))} type="number" min="1" placeholder="2" {...register('servings', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
+              {errors.servings ? <small className={`${fieldErrorClassName} font-[450]`}>{errors.servings.message}</small> : null}
             </label>
           </div>
-          <label className="field-label">タグ <span>任意</span></label>
+          <label className={fieldLabelClassName}>タグ <span>任意</span></label>
           <TagInput tags={tags ?? []} onChange={(nextTags) => setValue('tags', nextTags, { shouldDirty: true })} />
-          <label className="field-label"><Link2 size={15} /> 参考URL <span>任意</span></label>
-          <input className={`text-input ${errors.sourceUrl ? 'has-error' : ''}`} type="url" placeholder="https://example.com/recipe" {...register('sourceUrl')} />
-          {errors.sourceUrl ? <span className="field-error">{errors.sourceUrl.message}</span> : null}
-          <label className="field-label">自分用メモ <span>任意</span></label>
-          <textarea className="text-input" rows={4} placeholder="次に作るときのメモやアレンジなど" {...register('memo')} />
+          <label className={fieldLabelClassName}><Link2 size={15} /> 参考URL <span>任意</span></label>
+          <input className={textInputClassName({ error: Boolean(errors.sourceUrl) })} type="url" placeholder="https://example.com/recipe" {...register('sourceUrl')} />
+          {errors.sourceUrl ? <span className={fieldErrorClassName}>{errors.sourceUrl.message}</span> : null}
+          <label className={fieldLabelClassName}>自分用メモ <span>任意</span></label>
+          <textarea className={textInputClassName()} rows={4} placeholder="次に作るときのメモやアレンジなど" {...register('memo')} />
         </div>
       </section>
 
-      <div className="form-bottom-actions">
-        <Link to="/recipes" className="button button-ghost">キャンセル</Link>
+      <div className="flex justify-end gap-2.5 pb-7.5">
+        <Link to="/recipes" className={buttonClassName('ghost')}>キャンセル</Link>
         <Button type="submit" loading={isSaving} disabled={disableSave}>{submitLabel}</Button>
       </div>
     </form>
