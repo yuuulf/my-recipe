@@ -1,5 +1,4 @@
 import { createContext, useContext } from 'react'
-import { localGetProfileName } from '../lib/localStorage'
 import type { AppUser, Group, GroupMember } from '../types/database'
 
 export type AppContextValue = {
@@ -8,11 +7,9 @@ export type AppContextValue = {
   members: GroupMember[]
   authReady: boolean
   groupLoading: boolean
-  isDemoMode: boolean
   isDemoUser: boolean
   enterDemo: () => void
   signInWithGoogle: (redirectPath?: string) => Promise<void>
-  signInLocal: (email: string) => Promise<void>
   signOut: () => Promise<void>
   createGroup: (name: string) => Promise<Group>
   joinGroup: (inviteToken: string) => Promise<Group>
@@ -33,5 +30,4 @@ export const useCurrentGroup = useApp
 export const getMemberDisplayName = (member: GroupMember, user?: AppUser | null) =>
   member.profile?.display_name ||
   (user?.id === member.user_id ? user.displayName : null) ||
-  localGetProfileName(member.user_id) ||
   'メンバー'

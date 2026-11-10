@@ -7,15 +7,6 @@ import {
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import {
-  getLocalUser,
-  localCreateGroup,
-  localGetCurrentGroup,
-  localGetMembers,
-  localJoinGroup,
-  localSignIn,
-  localSignOut,
-} from '../lib/localStorage'
-import {
   clearDemoSession,
   getDemoGroup,
   getDemoMembers,
@@ -23,7 +14,7 @@ import {
   isDemoSessionActive,
   startDemoSession,
 } from '../lib/demoData'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { getSupabase, supabase } from '../lib/supabase'
 import { AppContext, type AppContextValue } from './app-context'
 import type { AppUser, Group, GroupMember } from '../types/database'
 
@@ -44,8 +35,7 @@ const normalizeGroup = (value: unknown): Group | null => {
 }
 
 const getSupabaseGroup = async (userId: string): Promise<Group | null> => {
-  if (!supabase) return null
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('group_members')
     .select('group_id, role, created_at, groups(*)')
     .eq('user_id', userId)
@@ -58,8 +48,7 @@ const getSupabaseGroup = async (userId: string): Promise<Group | null> => {
 }
 
 const getSupabaseMembers = async (groupId: string): Promise<GroupMember[]> => {
-  if (!supabase) return []
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('group_members')
     .select('group_id, user_id, role, created_at, profiles(display_name)')
     .eq('group_id', groupId)
@@ -106,16 +95,11 @@ export function AppProvider({ children }: PropsWithChildren) {
 
     setGroupLoading(true)
     try {
-      const nextGroup = isSupabaseConfigured
-        ? await getSupabaseGroup(nextUser.id)
-        : localGetCurrentGroup(nextUser.id)
+      const nextGroup = await getSupabaseGroup(nextUser.id)
       setGroup(nextGroup)
 
       if (nextGroup) {
-        const nextMembers = isSupabaseConfigured
-          ? await getSupabaseMembers(nextGroup.id)
-          : localGetMembers(nextGroup.id)
-        setMembers(nextMembers)
+        setMembers(await getSupabaseMembers(nextGroup.id))
       } else {
         setMembers([])
       }
@@ -141,15 +125,6 @@ export function AppProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     let mounted = true
 
-    const bootLocal = () => {
-      const localUser = getLocalUser()
-      if (!mounted) return
-      setIsDemoUser(false)
-      setUser(localUser)
-      setAuthReady(true)
-      void loadGroup(localUser)
-    }
-
     if (isDemoSessionActive()) {
       activateDemo()
       return () => {
@@ -157,8 +132,11 @@ export function AppProvider({ children }: PropsWithChildren) {
       }
     }
 
+    // Without connection settings the app shows the setup page, so there is no
+    // user to restore. The demo above still works without Supabase.
     if (!supabase) {
-      bootLocal()
+      setUser(null)
+      setAuthReady(true)
       return () => {
         mounted = false
       }
@@ -196,7 +174,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   }, [activateDemo, loadGroup])
 
   const signInWithGoogle = useCallback(async (redirectPath?: string) => {
-    if (!supabase) throw new Error('Supabaseが設定されていません。')
+    const client = getSupabase()
 
     if (isDemoSessionActive()) {
       setUser(null)
@@ -209,7 +187,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     const loginUrl = new URL('/login', window.location.origin)
     if (redirectPath) loginUrl.searchParams.set('returnTo', redirectPath)
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: loginUrl.toString(),
@@ -218,23 +196,11 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (error) throw error
   }, [])
 
-  const signInLocal = useCallback(async (email: string) => {
-    if (!email.trim()) throw new Error('メールアドレスを入力してください。')
-
-    clearDemoSession()
-    setIsDemoUser(false)
-
-    const nextUser = localSignIn(email.trim())
-    setUser(nextUser)
-    await loadGroup(nextUser)
-  }, [loadGroup])
-
   const signOut = useCallback(async () => {
+    // In the demo without connection settings there is no Supabase session.
     if (supabase) {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
-    } else {
-      localSignOut()
     }
     clearDemoSession()
     setIsDemoUser(false)
@@ -248,25 +214,18 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
     if (!name.trim()) throw new Error('レシピノートの名前を入力してください。')
 
-    let nextGroup: Group
-    if (supabase) {
-      const { data, error } = await supabase.rpc('create_group', {
-        p_name: name.trim(),
-      })
-      if (error) throw error
-      nextGroup = normalizeGroup(data)
-        ?? (() => {
-          throw new Error('レシピノートの作成結果を取得できませんでした。')
-        })()
-    } else {
-      nextGroup = localCreateGroup(name.trim(), user.id)
-    }
+    const { data, error } = await getSupabase().rpc('create_group', {
+      p_name: name.trim(),
+    })
+    if (error) throw error
+    const nextGroup = normalizeGroup(data)
+      ?? (() => {
+        throw new Error('レシピノートの作成結果を取得できませんでした。')
+      })()
     setGroup(nextGroup)
     await loadGroup(user)
-    if (supabase) {
-      setGroup(nextGroup)
-      setMembers(await getSupabaseMembers(nextGroup.id))
-    }
+    setGroup(nextGroup)
+    setMembers(await getSupabaseMembers(nextGroup.id))
     return nextGroup
   }, [isDemoUser, loadGroup, user])
 
@@ -275,26 +234,17 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
     if (!inviteToken.trim()) throw new Error('招待リンクが不正です。')
 
-    let nextGroup: Group
-    if (supabase) {
-      const { data, error } = await supabase.rpc('join_group', {
-        p_invite_token: inviteToken.trim(),
-      })
-      if (error) throw error
-      await loadGroup(user)
-      nextGroup = await getSupabaseGroup(user.id) ?? (() => {
-        throw new Error('レシピノートに参加した後の情報を取得できませんでした。')
-      })()
-      if (!data) throw new Error('レシピノートに参加できませんでした。')
-    } else {
-      nextGroup = localJoinGroup(inviteToken.trim(), user.id)
-      setGroup(nextGroup)
-      await loadGroup(user)
-    }
-    if (supabase) {
-      setGroup(nextGroup)
-      setMembers(await getSupabaseMembers(nextGroup.id))
-    }
+    const { data, error } = await getSupabase().rpc('join_group', {
+      p_invite_token: inviteToken.trim(),
+    })
+    if (error) throw error
+    await loadGroup(user)
+    const nextGroup = await getSupabaseGroup(user.id) ?? (() => {
+      throw new Error('レシピノートに参加した後の情報を取得できませんでした。')
+    })()
+    if (!data) throw new Error('レシピノートに参加できませんでした。')
+    setGroup(nextGroup)
+    setMembers(await getSupabaseMembers(nextGroup.id))
     return nextGroup
   }, [isDemoUser, loadGroup, user])
 
@@ -313,11 +263,9 @@ export function AppProvider({ children }: PropsWithChildren) {
     members,
     authReady,
     groupLoading,
-    isDemoMode: !isSupabaseConfigured,
     isDemoUser,
     enterDemo: activateDemo,
     signInWithGoogle,
-    signInLocal,
     signOut,
     createGroup,
     joinGroup,
@@ -332,7 +280,6 @@ export function AppProvider({ children }: PropsWithChildren) {
     joinGroup,
     members,
     refreshGroup,
-    signInLocal,
     signInWithGoogle,
     signOut,
     user,

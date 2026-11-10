@@ -25,7 +25,7 @@ const mobileNavItemClassName = (isActive: boolean) =>
   `flex flex-1 flex-col items-center justify-center gap-0.75 text-12 font-bold ${isActive ? 'text-primary' : 'text-text-muted'}`
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { group, user, signOut, isDemoMode, isDemoUser } = useApp()
+  const { group, user, signOut, isDemoUser } = useApp()
   const navigate = useNavigate()
 
   const handleSignOut = async () => {
@@ -68,10 +68,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </NavLink>
 
         <div className="border-t border-border pt-4">
-          {isDemoUser || isDemoMode ? (
+          {isDemoUser ? (
             <div className="mb-3 flex items-center gap-1.5 text-12 text-text-muted">
               <span className="size-1.75 rounded-full bg-primary/70 ring-3 ring-primary-soft" />
-              <span>{isDemoUser ? 'デモモード' : 'ローカルプレビュー中'}</span>
+              <span>デモモード</span>
             </div>
           ) : null}
           <div className="flex min-w-0 items-center gap-2.25">
