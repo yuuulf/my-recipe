@@ -84,7 +84,7 @@ export const createRecipe = async (
   userId: string,
   isDemoUser = false,
 ): Promise<Recipe> => {
-  if (isDemoUser) throw new Error('デモユーザーはレシピを保存できません。')
+  if (isDemoUser) throw new Error('デモモードではレシピを保存できません。')
   const payload = formToPayload(values, groupId, userId)
   if (!supabase) {
     const createdAt = new Date().toISOString()
@@ -112,7 +112,7 @@ export const updateRecipe = async (
   userId: string,
   isDemoUser = false,
 ): Promise<Recipe> => {
-  if (isDemoUser) throw new Error('デモユーザーはレシピを変更できません。')
+  if (isDemoUser) throw new Error('デモモードではレシピを変更できません。')
   const payload = formToPayload(values, '', userId)
   const updates = {
     title: payload.title,
@@ -139,7 +139,7 @@ export const updateRecipe = async (
 }
 
 export const deleteRecipe = async (id: string, isDemoUser = false): Promise<void> => {
-  if (isDemoUser) throw new Error('デモユーザーはレシピを削除できません。')
+  if (isDemoUser) throw new Error('デモモードではレシピを削除できません。')
   if (!supabase) {
     localDeleteRecipe(id)
     return

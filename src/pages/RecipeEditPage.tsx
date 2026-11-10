@@ -44,7 +44,7 @@ export function RecipeEditPage() {
           submitLabel="変更を保存"
           disableSave={isDemoUser}
           onSubmit={async (nextValues) => {
-            if (isDemoUser) throw new Error('デモユーザーはレシピを変更できません。')
+            if (isDemoUser) throw new Error('デモモードではレシピを変更できません。')
             if (!user) throw new Error('ログインが必要です。')
             await updateRecipe(id, nextValues, user.id, isDemoUser)
             navigate(`/recipes/${id}`)

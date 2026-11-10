@@ -15,7 +15,7 @@ export const DEMO_USER: AppUser = {
 
 export const DEMO_GROUP: Group = {
   id: DEMO_GROUP_ID,
-  name: 'みんなのレシピ帳',
+  name: 'みんなのレシピ',
   invite_token: DEMO_INVITE_TOKEN,
   created_by: DEMO_USER_ID,
   created_at: '2025-01-12T09:00:00.000Z',

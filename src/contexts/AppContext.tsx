@@ -245,8 +245,8 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const createGroup = useCallback(async (name: string) => {
     if (!user) throw new Error('ログインが必要です。')
-    if (isDemoUser) throw new Error('デモユーザーはグループを変更できません。')
-    if (!name.trim()) throw new Error('グループ名を入力してください。')
+    if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
+    if (!name.trim()) throw new Error('レシピノートの名前を入力してください。')
 
     let nextGroup: Group
     if (supabase) {
@@ -256,7 +256,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       if (error) throw error
       nextGroup = normalizeGroup(data)
         ?? (() => {
-          throw new Error('グループの作成結果を取得できませんでした。')
+          throw new Error('レシピノートの作成結果を取得できませんでした。')
         })()
     } else {
       nextGroup = localCreateGroup(name.trim(), user.id)
@@ -272,7 +272,7 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const joinGroup = useCallback(async (inviteToken: string) => {
     if (!user) throw new Error('ログインが必要です。')
-    if (isDemoUser) throw new Error('デモユーザーはグループを変更できません。')
+    if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
     if (!inviteToken.trim()) throw new Error('招待リンクが不正です。')
 
     let nextGroup: Group
@@ -283,9 +283,9 @@ export function AppProvider({ children }: PropsWithChildren) {
       if (error) throw error
       await loadGroup(user)
       nextGroup = await getSupabaseGroup(user.id) ?? (() => {
-        throw new Error('グループ参加後の情報を取得できませんでした。')
+        throw new Error('レシピノートに参加した後の情報を取得できませんでした。')
       })()
-      if (!data) throw new Error('グループに参加できませんでした。')
+      if (!data) throw new Error('レシピノートに参加できませんでした。')
     } else {
       nextGroup = localJoinGroup(inviteToken.trim(), user.id)
       setGroup(nextGroup)

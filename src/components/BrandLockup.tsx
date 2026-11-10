@@ -1,32 +1,31 @@
-import { Soup } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import logoUrl from '../assets/logo.png'
+
+type BrandLockupVariant = 'full' | 'compact' | 'header' | 'login'
 
 type BrandLockupProps = {
-  // full: sidebar with subtitle. compact: logo and name only.
-  // header: compact with a slightly smaller name for the mobile header.
-  variant?: 'full' | 'compact' | 'header'
+  // full: sidebar. compact: invite and legal pages. header: mobile header.
+  // login: the larger logo on the login page.
+  variant?: BrandLockupVariant
   to?: string
   className?: string
 }
 
+const variantClassNames: Record<BrandLockupVariant, { root: string, logo: string, name: string }> = {
+  full: { root: 'gap-2.5', logo: 'size-8', name: 'text-16' },
+  compact: { root: 'gap-2', logo: 'size-7.5', name: 'text-16' },
+  header: { root: 'gap-2', logo: 'size-7.5', name: 'text-15' },
+  login: { root: 'gap-2.5 sm:gap-3', logo: 'size-9 sm:size-10', name: 'text-28 sm:text-30' },
+}
+
 export function BrandLockup({ variant = 'compact', to, className = '' }: BrandLockupProps) {
-  const isFull = variant === 'full'
-  const rootClassName = `flex items-center text-text ${isFull ? 'gap-2.5' : 'gap-2'} ${className}`.trim()
-  const nameClassName = `${variant === 'header' ? 'text-15' : 'text-16'} font-bold tracking-[-.02em]`
+  const classNames = variantClassNames[variant]
+  const rootClassName = `flex items-center text-text ${classNames.root} ${className}`.trim()
 
   const content = (
     <>
-      <div className={`grid flex-none place-items-center rounded-md bg-primary text-white ${isFull ? 'size-8' : 'size-7.5'}`} aria-hidden="true">
-        {isFull ? <Soup size={21} strokeWidth={2.4} /> : <Soup size={19} />}
-      </div>
-      {isFull ? (
-        <div className="flex flex-col leading-[1.15]">
-          <strong className={nameClassName}>My Recipe</strong>
-          <span className="mt-1 text-11 text-text-muted">レシピ管理</span>
-        </div>
-      ) : (
-        <strong className={nameClassName}>My Recipe</strong>
-      )}
+      <img src={logoUrl} alt="" className={`flex-none rounded-sm ${classNames.logo}`} />
+      <strong className={`${classNames.name} font-bold tracking-[-.02em]`}>My Recipe</strong>
     </>
   )
 
