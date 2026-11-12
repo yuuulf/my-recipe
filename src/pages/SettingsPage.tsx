@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { AppShell } from '../components/Layout/AppShell'
 import { eyebrowClassName, pageHeaderClassName, pageLeadClassName, pageTitleClassName } from '../components/styles'
 import { getMemberDisplayName, useApp } from '../contexts/app-context'
+import { RecipeNoteNameHeading } from '../features/groups/components/RecipeNoteNameHeading'
 
 const cardClassName = 'min-w-0 rounded-lg border border-border bg-surface p-4.75 shadow-sm sm:p-5.5'
 const cardHeadingClassName = 'flex items-center gap-2.75'
@@ -19,6 +20,7 @@ export function SettingsPage() {
   const { group, members, signOut, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
+  const isOwner = members.some((member) => member.user_id === user?.id && member.role === 'owner')
   const inviteUrl = isDemoUser
     ? `${window.location.origin}/login`
     : group
@@ -53,7 +55,10 @@ export function SettingsPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <section className={cardClassName}>
-          <div className={cardHeadingClassName}><div className={cardIconClassName()}><UsersRound size={19} /></div><h2 className={cardTitleClassName}>{group?.name}</h2></div>
+          <div className={cardHeadingClassName}>
+            <div className={`${cardIconClassName()} flex-none self-start`}><UsersRound size={19} /></div>
+            {group ? <RecipeNoteNameHeading key={group.id} group={group} canRename={isOwner && !isDemoUser} titleClassName={cardTitleClassName} /> : null}
+          </div>
           <div className="mt-5.5 mb-3.25 h-px bg-border" />
           <div className={detailRowClassName}><span>オーナー</span><strong>{members.find((member) => member.role === 'owner') ? getMemberDisplayName(members.find((member) => member.role === 'owner')!, user) : user?.displayName}</strong></div>
           <div className={detailRowClassName}><span>メンバー数</span><strong>{members.length}人</strong></div>

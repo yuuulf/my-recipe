@@ -18,6 +18,8 @@ export type AppContextValue = {
   joinGroup: (inviteToken: string) => Promise<Group>
   refreshGroup: () => Promise<void>
   selectGroup: (groupId: string) => Promise<void>
+  // Owners only; the server rejects everyone else.
+  renameGroup: (groupId: string, name: string) => Promise<Group>
 }
 
 export const AppContext = createContext<AppContextValue | null>(null)

@@ -294,6 +294,29 @@ export function AppProvider({ children }: PropsWithChildren) {
     return nextGroup
   }, [isDemoUser, loadGroup, user])
 
+  // Renames a recipe note. The server checks that the user is its owner.
+  const renameGroup = useCallback(async (groupId: string, name: string) => {
+    if (!user) throw new Error('ログインが必要です。')
+    if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
+    const nextName = name.trim()
+    if (!nextName) throw new Error('レシピノートの名前を入力してください。')
+    // Same limit as the rename_group RPC and the setup screen.
+    if (nextName.length > 50) throw new Error('レシピノートの名前は1〜50文字にしてください。')
+
+    const { data, error } = await getSupabase().rpc('rename_group', {
+      p_group_id: groupId,
+      p_name: nextName,
+    })
+    if (error) throw error
+    const renamed = normalizeGroup(data)
+      ?? (() => {
+        throw new Error('レシピノートの名前を変更できませんでした。')
+      })()
+    setGroups((current) => current.map((item) => (item.id === renamed.id ? renamed : item)))
+    setGroup((current) => (current?.id === renamed.id ? renamed : current))
+    return renamed
+  }, [isDemoUser, user])
+
   const refreshGroup = useCallback(async () => {
     if (isDemoUser) {
       setGroups([getDemoGroup()])
@@ -319,6 +342,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     createGroup,
     joinGroup,
     refreshGroup,
+    renameGroup,
     selectGroup,
   }), [
     authReady,
@@ -331,6 +355,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     joinGroup,
     members,
     refreshGroup,
+    renameGroup,
     selectGroup,
     signInWithGoogle,
     signOut,
