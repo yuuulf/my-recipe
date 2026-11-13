@@ -15,6 +15,7 @@ import {
   startDemoSession,
 } from '../lib/demoData'
 import { getSupabase, supabase } from '../lib/supabase'
+import { RECIPE_NOTE_NAME_MAX, recipeNoteNameError } from '../features/groups/recipeNoteLimits'
 import { AppContext, type AppContextValue } from './app-context'
 import type { AppUser, Group, GroupMember } from '../types/database'
 
@@ -260,6 +261,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (!user) throw new Error('ログインが必要です。')
     if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
     if (!name.trim()) throw new Error('レシピノートの名前を入力してください。')
+    if (name.trim().length > RECIPE_NOTE_NAME_MAX) throw new Error(recipeNoteNameError)
 
     const { data, error } = await getSupabase().rpc('create_group', {
       p_name: name.trim(),
@@ -300,8 +302,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
     const nextName = name.trim()
     if (!nextName) throw new Error('レシピノートの名前を入力してください。')
-    // Same limit as the rename_group RPC and the setup screen.
-    if (nextName.length > 50) throw new Error('レシピノートの名前は1〜50文字にしてください。')
+    if (nextName.length > RECIPE_NOTE_NAME_MAX) throw new Error(recipeNoteNameError)
 
     const { data, error } = await getSupabase().rpc('rename_group', {
       p_group_id: groupId,

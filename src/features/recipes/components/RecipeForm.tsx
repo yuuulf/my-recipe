@@ -21,20 +21,68 @@ import { IngredientEditor } from './IngredientEditor'
 import { RecipeDraftAssist } from './RecipeDraftAssist'
 import { StepEditor } from './StepEditor'
 import { TagInput } from './TagInput'
+import { formatLimit, RECIPE_LIMITS } from '../recipeLimits'
 
-const optionalNumber = z.number({ error: '数値を入力してください。' }).int('整数で入力してください。').positive('0より大きい値を入力してください。').optional()
+const optionalNumber = (max: number, maxMessage: string) =>
+  z.number({ error: '数値を入力してください。' })
+    .int('整数で入力してください。')
+    .positive('0より大きい値を入力してください。')
+    .max(max, maxMessage)
+    .optional()
+
+const maxText = (label: string, max: number) =>
+  z.string().max(max, `${label}は${formatLimit(max)}文字以内にしてください。`)
+
+// Checks the non-empty rows (empty rows are dropped when saving). Errors go to
+// the list as one message, shown under the editor.
+const rowList = (label: string, maxLine: number) =>
+  z.array(z.string()).superRefine((values, context) => {
+    const rows = values.map((value, index) => ({ value: value.trim(), index })).filter((row) => row.value)
+    if (rows.length > RECIPE_LIMITS.lines) {
+      context.addIssue({ code: 'custom', message: `${label}は${RECIPE_LIMITS.lines}行までにしてください。` })
+      return
+    }
+    const tooLong = rows.find((row) => row.value.length > maxLine)
+    if (tooLong) {
+      context.addIssue({ code: 'custom', message: `${label}は1行${formatLimit(maxLine)}文字以内にしてください（${tooLong.index + 1}行目）。` })
+    }
+  })
 
 const recipeSchema = z.object({
-  title: z.string().trim().min(1, '料理名を入力してください。'),
-  description: z.string(),
-  ingredients: z.array(z.string()),
-  steps: z.array(z.string()),
-  tags: z.array(z.string()),
-  cookingTimeMinutes: optionalNumber,
-  servings: optionalNumber,
-  sourceUrl: z.string().refine((value) => !value || /^https?:\/\//.test(value), 'http:// または https:// から始まるURLを入力してください。'),
-  memo: z.string(),
+  title: z.string().trim().min(1, '料理名を入力してください。').max(RECIPE_LIMITS.title, `料理名は${RECIPE_LIMITS.title}文字以内にしてください。`),
+  description: maxText('ひとこと説明', RECIPE_LIMITS.description),
+  ingredients: rowList('材料', RECIPE_LIMITS.ingredientLine),
+  steps: rowList('作り方', RECIPE_LIMITS.stepLine),
+  // Normally kept within limits by TagInput; this covers values set another way.
+  tags: z.array(z.string()).superRefine((values, context) => {
+    if (values.length > RECIPE_LIMITS.tags) {
+      context.addIssue({ code: 'custom', message: `タグは${RECIPE_LIMITS.tags}個までにしてください。` })
+      return
+    }
+    const tooLong = values.find((value) => value.length > RECIPE_LIMITS.tag)
+    if (tooLong) context.addIssue({ code: 'custom', message: `タグは${RECIPE_LIMITS.tag}文字以内にしてください（#${tooLong}）。` })
+  }),
+  cookingTimeMinutes: optionalNumber(RECIPE_LIMITS.cookingTimeMinutes, `調理時間は${formatLimit(RECIPE_LIMITS.cookingTimeMinutes)}分以内にしてください。`),
+  servings: optionalNumber(RECIPE_LIMITS.servings, `人数は${RECIPE_LIMITS.servings}人分以内にしてください。`),
+  sourceUrl: maxText('参考URL', RECIPE_LIMITS.sourceUrl)
+    .refine((value) => !value || /^https?:\/\/\S+/i.test(value), 'http:// または https:// から始まるURLを入力してください。'),
+  memo: maxText('メモ', RECIPE_LIMITS.memo),
 })
+
+// An error on a whole list field. With row inputs registered as "ingredients.0"
+// and so on, react-hook-form puts list-level errors under `root`.
+const listErrorMessage = (error: { message?: string, root?: { message?: string } } | undefined) =>
+  error?.message ?? error?.root?.message
+
+// "123 / 500" under a long text field; red once over the limit.
+function CharacterCount({ value, max }: { value: string, max: number }) {
+  const over = value.length > max
+  return (
+    <p className={`mt-1.5 text-right text-12 tabular-nums ${over ? 'text-danger' : 'text-text-muted'}`}>
+      {formatLimit(value.length)} / {formatLimit(max)}
+    </p>
+  )
+}
 
 const fallbackValues: RecipeFormValues = {
   title: '',
@@ -71,10 +119,15 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
   const { register, handleSubmit, watch, setValue, reset, formState: { errors, isDirty } } = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeSchema),
     defaultValues: defaultValues ?? fallbackValues,
+    // Check a field when the user leaves it, then on every change. This also shows
+    // errors in the demo, where the save button is disabled.
+    mode: 'onTouched',
   })
   const ingredientValues = watch('ingredients') ?? ['']
   const stepValues = watch('steps') ?? ['']
   const tags = watch('tags')
+  const description = watch('description') ?? ''
+  const memo = watch('memo') ?? ''
 
   useEffect(() => {
     reset(defaultValues ?? fallbackValues)
@@ -160,7 +213,9 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
           <input className={textInputClassName({ error: Boolean(errors.title), size: 'title' })} placeholder="例：豚の生姜焼き" autoFocus {...register('title')} />
           {errors.title ? <span className={fieldErrorClassName}>{errors.title.message}</span> : null}
           <label className={fieldLabelClassName}>ひとこと説明 <span>任意</span></label>
-          <textarea className={textInputClassName()} rows={3} placeholder="料理の特徴や、作るきっかけなど" {...register('description')} />
+          <textarea className={textInputClassName({ error: Boolean(errors.description) })} rows={3} placeholder="料理の特徴や、作るきっかけなど" {...register('description')} />
+          <CharacterCount value={description} max={RECIPE_LIMITS.description} />
+          {errors.description ? <span className={fieldErrorClassName}>{errors.description.message}</span> : null}
         </div>
       </section>
 
@@ -175,7 +230,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
               onAppend={() => setValue('ingredients', [...ingredientValues, ''], { shouldDirty: true })}
               onRemove={removeIngredient}
               onMove={(from, to) => moveRow('ingredients', from, to)}
-              error={errors.ingredients?.message}
+              error={listErrorMessage(errors.ingredients)}
             />
           </div>
         </div>
@@ -192,7 +247,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
               onAppend={() => setValue('steps', [...stepValues, ''], { shouldDirty: true })}
               onRemove={removeStep}
               onMove={(from, to) => moveRow('steps', from, to)}
-              error={errors.steps?.message}
+              error={listErrorMessage(errors.steps)}
             />
           </div>
         </div>
@@ -204,21 +259,24 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
           <h2 className={`${sectionHeadingClassName} text-20`}>料理のメモ</h2>
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
             <label className={fieldLabelClassName}>調理時間 <span>分</span>
-              <input className={numberInputClassName(Boolean(errors.cookingTimeMinutes))} type="number" min="1" placeholder="20" {...register('cookingTimeMinutes', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
+              <input className={numberInputClassName(Boolean(errors.cookingTimeMinutes))} type="number" min="1" max={RECIPE_LIMITS.cookingTimeMinutes} placeholder="20" {...register('cookingTimeMinutes', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
               {errors.cookingTimeMinutes ? <small className={`${fieldErrorClassName} font-[450]`}>{errors.cookingTimeMinutes.message}</small> : null}
             </label>
             <label className={fieldLabelClassName}>人数 <span>人分</span>
-              <input className={numberInputClassName(Boolean(errors.servings))} type="number" min="1" placeholder="2" {...register('servings', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
+              <input className={numberInputClassName(Boolean(errors.servings))} type="number" min="1" max={RECIPE_LIMITS.servings} placeholder="2" {...register('servings', { setValueAs: (value) => value === '' ? undefined : Number(value) })} />
               {errors.servings ? <small className={`${fieldErrorClassName} font-[450]`}>{errors.servings.message}</small> : null}
             </label>
           </div>
           <label className={fieldLabelClassName}>タグ <span>任意</span></label>
-          <TagInput tags={tags ?? []} onChange={(nextTags) => setValue('tags', nextTags, { shouldDirty: true })} />
+          <TagInput tags={tags ?? []} onChange={(nextTags) => setValue('tags', nextTags, { shouldDirty: true, shouldValidate: Boolean(errors.tags) })} />
+          {listErrorMessage(errors.tags) ? <span className={fieldErrorClassName}>{listErrorMessage(errors.tags)}</span> : null}
           <label className={fieldLabelClassName}><Link2 size={15} /> 参考URL <span>任意</span></label>
           <input className={textInputClassName({ error: Boolean(errors.sourceUrl) })} type="url" placeholder="https://example.com/recipe" {...register('sourceUrl')} />
           {errors.sourceUrl ? <span className={fieldErrorClassName}>{errors.sourceUrl.message}</span> : null}
           <label className={fieldLabelClassName}>メモ <span>任意</span></label>
-          <textarea className={textInputClassName()} rows={4} placeholder="次に作るときのメモやアレンジなど" {...register('memo')} />
+          <textarea className={textInputClassName({ error: Boolean(errors.memo) })} rows={4} placeholder="次に作るときのメモやアレンジなど" {...register('memo')} />
+          <CharacterCount value={memo} max={RECIPE_LIMITS.memo} />
+          {errors.memo ? <span className={fieldErrorClassName}>{errors.memo.message}</span> : null}
         </div>
       </section>
 

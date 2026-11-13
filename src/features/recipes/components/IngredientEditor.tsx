@@ -4,6 +4,7 @@ import { fieldErrorClassName, textInputClassName } from '../../../components/sty
 import type { RecipeFormValues } from '../../../types/database'
 import { addRowButtonClassName, editorListClassName, removeRowButtonClassName, rowActionsClassName } from './editorStyles'
 import { RowMoveButtons } from './RowMoveButtons'
+import { RECIPE_LIMITS } from '../recipeLimits'
 
 type EditorProps = {
   values: string[]
@@ -41,7 +42,7 @@ export function IngredientEditor({ values, register, onAppend, onRemove, onMove,
           </div>
         </div>
       ))}
-      <button type="button" className={addRowButtonClassName} disabled={disabled} onClick={onAppend}>
+      <button type="button" className={addRowButtonClassName} disabled={disabled || values.length >= RECIPE_LIMITS.lines} onClick={onAppend}>
         <Plus size={16} /> 材料を追加
       </button>
       {error ? <span className={fieldErrorClassName}>{error}</span> : null}
