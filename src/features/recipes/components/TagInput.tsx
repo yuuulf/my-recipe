@@ -1,6 +1,7 @@
 import { Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { editableTagClassName } from '../../../components/styles'
+import { RECIPE_LIMITS } from '../recipeLimits'
 
 type TagInputProps = {
   tags: string[]
@@ -10,15 +11,28 @@ type TagInputProps = {
 
 export function TagInput({ tags, onChange, disabled = false }: TagInputProps) {
   const [value, setValue] = useState('')
+  const [error, setError] = useState('')
+  const full = tags.length >= RECIPE_LIMITS.tags
 
+  // Over-limit tags are not added; the text stays so the user can shorten it.
   const addTag = () => {
     const next = value.trim().replace(/^#/, '')
     if (!next || tags.includes(next)) {
       setValue('')
+      setError('')
+      return
+    }
+    if (full) {
+      setError(`タグは${RECIPE_LIMITS.tags}個までです。`)
+      return
+    }
+    if (next.length > RECIPE_LIMITS.tag) {
+      setError(`タグは${RECIPE_LIMITS.tag}文字以内にしてください。`)
       return
     }
     onChange([...tags, next])
     setValue('')
+    setError('')
   }
 
   return (
@@ -38,8 +52,14 @@ export function TagInput({ tags, onChange, disabled = false }: TagInputProps) {
           className="min-h-10.5 w-full min-w-0 bg-surface px-0.5 py-1.75 text-14 leading-[1.6] text-text outline-none disabled:cursor-not-allowed disabled:bg-surface-muted disabled:opacity-72"
           disabled={disabled}
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => {
+            setValue(event.target.value)
+            setError('')
+          }}
           onKeyDown={(event) => {
+            // Ignore keys that confirm Japanese input conversion.
+            // keyCode 229 covers Safari, which ends composition before keydown.
+            if (event.nativeEvent.isComposing || event.keyCode === 229) return
             if (event.key === 'Enter' || event.key === ',') {
               event.preventDefault()
               addTag()
@@ -47,11 +67,13 @@ export function TagInput({ tags, onChange, disabled = false }: TagInputProps) {
           }}
           placeholder="タグを入力してEnter"
         />
-        <button type="button" className="grid size-7 flex-none place-items-center rounded-sm bg-primary-soft text-primary" disabled={disabled} onClick={addTag} aria-label="タグを追加">
+        <button type="button" className="grid size-7 flex-none place-items-center rounded-sm bg-primary-soft text-primary disabled:cursor-not-allowed disabled:opacity-40" disabled={disabled || full} onClick={addTag} aria-label="タグを追加">
           <Plus size={16} />
         </button>
       </div>
-      <span className="block text-12 text-text-muted">Enter または ＋ で追加できます</span>
+      {error
+        ? <span className="block text-12 text-danger" role="alert">{error}</span>
+        : <span className="block text-12 text-text-muted">{full ? `タグは${RECIPE_LIMITS.tags}個までです` : 'Enter または ＋ で追加できます'}</span>}
     </div>
   )
 }

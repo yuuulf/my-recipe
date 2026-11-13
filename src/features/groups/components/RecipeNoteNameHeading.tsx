@@ -5,9 +5,7 @@ import { alertErrorClassName, iconButtonClassName, textInputClassName } from '..
 import { useApp } from '../../../contexts/app-context'
 import { getErrorMessage } from '../../../lib/errors'
 import type { Group } from '../../../types/database'
-
-// Same limit as the rename_group RPC and the setup screen.
-const NAME_MAX_LENGTH = 50
+import { RECIPE_NOTE_NAME_MAX } from '../recipeNoteLimits'
 
 type RecipeNoteNameHeadingProps = {
   group: Group
@@ -87,11 +85,11 @@ export function RecipeNoteNameHeading({ group, canRename, titleClassName }: Reci
             cancel()
           }
         }}
-        maxLength={NAME_MAX_LENGTH}
         disabled={saving}
         autoFocus
       />
-      <p className="mt-1.5 text-right text-12 text-text-muted tabular-nums">{name.length} / {NAME_MAX_LENGTH}</p>
+      {/* No maxLength, so a pasted long name is not cut silently; saving shows the error instead. */}
+      <p className={`mt-1.5 text-right text-12 tabular-nums ${name.trim().length > RECIPE_NOTE_NAME_MAX ? 'text-danger' : 'text-text-muted'}`}>{name.length} / {RECIPE_NOTE_NAME_MAX}</p>
       {error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
       <div className="mt-2 flex flex-wrap gap-2">
         <Button type="button" size="compact-short" loading={saving} onClick={() => void save()}>保存</Button>

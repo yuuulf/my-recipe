@@ -13,5 +13,8 @@ export const moveRowButtonClassName = [
   'disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-muted',
 ].join(' ')
 
-export const addRowButtonClassName =
-  'mt-1 ml-8.75 inline-flex items-center gap-1.5 justify-self-start bg-transparent py-1.25 text-14 font-bold text-primary hover:text-primary-hover'
+// Disabled at the row limit, so it needs a visible disabled state.
+export const addRowButtonClassName = [
+  'mt-1 ml-8.75 inline-flex items-center gap-1.5 justify-self-start bg-transparent py-1.25 text-14 font-bold text-primary hover:text-primary-hover',
+  'disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-primary',
+].join(' ')

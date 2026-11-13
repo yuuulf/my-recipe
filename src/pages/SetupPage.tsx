@@ -6,6 +6,7 @@ import { PageLoader } from '../components/Loading'
 import { alertErrorClassName, backLinkClassName, eyebrowClassName, fieldLabelClassName, textInputClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
+import { RECIPE_NOTE_NAME_MAX } from '../features/groups/recipeNoteLimits'
 
 export function SetupPage() {
   const { createGroup, groups, groupLoading, user, isDemoUser } = useApp()
@@ -46,7 +47,9 @@ export function SetupPage() {
         <p className="mb-6.5 text-14 leading-[1.85] text-text-secondary">{hasNotes ? '新しいレシピノートに名前をつけます。作ったレシピノートが開きます。' : '家族や友人と共有するレシピノートに名前をつけます。'}</p>
         <form onSubmit={(event) => void handleSubmit(event)}>
           <label className={fieldLabelClassName} htmlFor="group-name">レシピノートの名前</label>
-          <input id="group-name" className={textInputClassName({ size: 'tall' })} value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="例：我が家のレシピ" maxLength={50} autoFocus required />
+          <input id="group-name" className={textInputClassName({ size: 'tall' })} value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="例：我が家のレシピ" autoFocus required />
+          {/* No maxLength, so a pasted long name is not cut silently; createGroup reports it. */}
+          <p className={`mt-1.5 text-right text-12 tabular-nums ${groupName.trim().length > RECIPE_NOTE_NAME_MAX ? 'text-danger' : 'text-text-muted'}`}>{groupName.length} / {RECIPE_NOTE_NAME_MAX}</p>
           {error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
           <Button className="mt-4.25 w-full" size="lg" type="submit" loading={isSubmitting}>レシピノートを作成 <ArrowRight size={17} /></Button>
         </form>

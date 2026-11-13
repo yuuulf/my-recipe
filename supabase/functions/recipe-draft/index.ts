@@ -18,12 +18,22 @@ type ErrorCode =
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 const OPENROUTER_TIMEOUT_MS = 60_000
 
-// Limits match the form and the database (the title is at most 160 characters).
-const TITLE_MAX = 160
-const FIELD_MAX = 2000
-const LINE_MAX = 500
-const LIST_MAX = 50
-const TAG_MAX = 10
+// Same limits as the recipe form and the database, so a draft never fails the
+// form's checks. Keep in sync with src/features/recipes/recipeLimits.ts and
+// supabase/migrations/20261113000000_add_input_limits.sql.
+const LIMITS = {
+  title: 100,
+  description: 500,
+  ingredientLine: 100,
+  stepLine: 500,
+  lines: 50,
+  tag: 20,
+  tags: 10,
+  cookingTimeMinutes: 4320,
+  servings: 100,
+  sourceUrl: 2000,
+  memo: 2000,
+} as const
 
 const SYSTEM_PROMPT = [
   'あなたは料理レシピの入力を手伝うアシスタントです。',
@@ -59,28 +69,35 @@ const draftJsonSchema = {
 // Providers may not follow the schema exactly, so the result is checked again here.
 // Missing or wrong-typed optional fields become empty instead of failing the draft.
 const trimmedString = (max: number) => z.string().catch('').transform((value) => value.trim().slice(0, max))
-const lines = z.array(z.unknown()).catch([]).transform((values) =>
+const strings = z.array(z.unknown()).catch([]).transform((values) =>
   values
     .filter((value): value is string => typeof value === 'string')
-    .map((value) => value.trim().slice(0, LINE_MAX))
-    .filter(Boolean)
-    .slice(0, LIST_MAX),
+    .map((value) => value.trim())
+    .filter(Boolean),
 )
-const positiveInt = z.unknown().optional().transform((value) =>
-  typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : null,
+const lines = (maxLine: number) =>
+  strings.transform((values) => values.map((value) => value.slice(0, maxLine)).slice(0, LIMITS.lines))
+// Out-of-range numbers become empty rather than being clamped.
+const positiveInt = (max: number) => z.unknown().optional().transform((value) =>
+  typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= max ? value : null,
 )
 const draftSchema = z.object({
-  title: trimmedString(TITLE_MAX),
-  description: trimmedString(FIELD_MAX),
-  ingredients: lines,
-  steps: lines,
-  tags: lines.transform((values) =>
-    Array.from(new Set(values.map((value) => value.replace(/^#+/, '').trim()).filter(Boolean))).slice(0, TAG_MAX),
+  title: trimmedString(LIMITS.title),
+  description: trimmedString(LIMITS.description),
+  ingredients: lines(LIMITS.ingredientLine),
+  steps: lines(LIMITS.stepLine),
+  // Long tags are dropped, not cut, since a cut tag rarely makes sense.
+  tags: strings.transform((values) =>
+    Array.from(new Set(values.map((value) => value.replace(/^#+/, '').trim())))
+      .filter((value) => value && value.length <= LIMITS.tag)
+      .slice(0, LIMITS.tags),
   ),
-  cookingTimeMinutes: positiveInt,
-  servings: positiveInt,
-  sourceUrl: trimmedString(FIELD_MAX).transform((value) => (/^https?:\/\//i.test(value) ? value : '')),
-  memo: trimmedString(FIELD_MAX),
+  cookingTimeMinutes: positiveInt(LIMITS.cookingTimeMinutes),
+  servings: positiveInt(LIMITS.servings),
+  // A cut URL would be broken, so an over-long one is dropped.
+  sourceUrl: z.string().catch('').transform((value) => value.trim())
+    .transform((value) => (value.length <= LIMITS.sourceUrl && /^https?:\/\/\S+/i.test(value) ? value : '')),
+  memo: trimmedString(LIMITS.memo),
 })
 
 type RecipeDraft = z.infer<typeof draftSchema>
