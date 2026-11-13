@@ -12,7 +12,8 @@ context: |
   service-roleキーなどの秘密情報は VITE_* 変数に入れない。
   スキーマを変えるときは supabase/migrations/ にタイムスタンプ付きの新しいSQLを追加する。既存のマイグレーションは書き換えない。
   手元のサンプルデータは supabase/seed.sql にあり、`npm run db:reset` でマイグレーションと一緒に当たる。
-  自動テストはまだない。検証は `npm run lint`、`npm run build`、Supabase Local とデモでの手動確認で行う。
+  自動テストは、Vitest（ロジックと画面の部品。`npm test`、Supabase は不要）と pgTAP（RLS・RPC・検索の関数・制約。`npm run db:test`、Supabase Local が必要）にあり、PR ごとに GitHub Actions で実行する。
+  検証は `npm run lint`、`npm run build`、自動テストに加えて、Supabase Local とデモでの手動確認で行う。
   成果物（proposal / design / specs / tasks）は日本語で書く。
 
 rules:
@@ -30,7 +31,8 @@ rules:
     - 認証が必要な画面とグループ所属が必要な画面を区別してシナリオを書く
     - デモモードで無効になる操作がある場合は、そのシナリオも書く
   tasks:
-    - 最後に `npm run lint` と `npm run build` のタスクを入れる
+    - 最後に `npm run lint`、`npm run build`、`npm test`、`npm run db:test` のタスクを入れる
+    - ロジック、画面の部品、RLS、RPC、制約を変えるときは、それを確かめるテストを足すタスクを、その実装と同じ章に入れる
     - 影響するモードごとに手動確認のタスクを入れる
     - スキーマ変更がある場合は、マイグレーション追加のタスクを独立させる
 
