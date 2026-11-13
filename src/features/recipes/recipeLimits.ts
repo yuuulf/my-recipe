@@ -1,6 +1,6 @@
 // Input limits for recipes. The server enforces the same values: keep them in
 // sync with supabase/migrations/20261113000000_add_input_limits.sql and
-// supabase/functions/recipe-draft/index.ts.
+// supabase/functions/recipe-draft/draft.ts.
 export const RECIPE_LIMITS = {
   title: 100,
   description: 500,

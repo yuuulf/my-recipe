@@ -87,6 +87,7 @@ http://localhost:5173/join/00000000-0000-4000-8000-000000000301
 | `npm run db:stop` | 停止する |
 | `npm run db:reset` | データベースを作り直し、マイグレーションとサンプルデータ（[`supabase/seed.sql`](supabase/seed.sql)）を当て直す |
 | `npm run db:status` | `API_URL`、`PUBLISHABLE_KEY`、Supabase Studioの `STUDIO_URL` などを表示する |
+| `npm run db:test` | [`supabase/tests/`](supabase/tests/) のデータベースのテスト（pgTAP）を実行する。RLS、RPC、検索の関数、入力の上限を確かめる |
 
 スキーマを変えるときは、[`supabase/migrations/`](supabase/migrations/) にタイムスタンプ付きのSQLを追加し、`npm run db:reset` でマイグレーションとサンプルデータが当たることを確認します。本番には、Supabase SQL EditorまたはSupabase CLIでマイグレーションを当てます。
 
@@ -177,5 +178,9 @@ npx supabase functions deploy recipe-draft
 ```bash
 npm run build
 npm run lint
+npm test            # ロジックと画面の部品のテスト（Vitest）。Supabaseは不要
 npm run db:start    # Supabase Local（ほかは「Supabase Localのコマンド」を参照）
+npm run db:test     # データベースのテスト（pgTAP）。Supabase Localの起動が必要
 ```
+
+PRを作ると、GitHub Actionsでlint、build、Vitestと、データベースのテストが実行されます。
