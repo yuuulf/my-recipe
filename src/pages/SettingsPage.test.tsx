@@ -27,6 +27,7 @@ const renderSettings = (overrides: Partial<AppContextValue>) => {
         <Routes>
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/recipes" element={<p>レシピ一覧の画面</p>} />
+          <Route path="/login" element={<p>ログイン画面</p>} />
         </Routes>
       </MemoryRouter>
     </AppContext.Provider>,
@@ -93,6 +94,17 @@ describe('SettingsPage: leaving', () => {
     await user.click(within(dialog).getByRole('button', { name: '退出する' }))
     expect(value.leaveGroup).toHaveBeenCalledWith(testGroup.id)
     expect(await screen.findByText('レシピ一覧の画面')).toBeInTheDocument()
+  })
+
+  it('opens the login page when no recipe note is left after leaving', async () => {
+    const { value, user } = renderSettings({
+      members: memberOfOthers,
+      leaveGroup: vi.fn(async () => 'signed_out' as const),
+    })
+    await user.click(leaveButton('退出する'))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: '退出する' }))
+    expect(value.leaveGroup).toHaveBeenCalledWith(testGroup.id)
+    expect(await screen.findByText('ログイン画面')).toBeInTheDocument()
   })
 
   it('does not leave when the confirmation is cancelled', async () => {

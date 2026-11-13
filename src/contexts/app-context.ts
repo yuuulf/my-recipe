@@ -25,7 +25,8 @@ export type AppContextValue = {
   // Owners only; the server rejects everyone else.
   renameGroup: (groupId: string, name: string) => Promise<Group>
   // Leaves a recipe note. An owner can leave only when alone, which deletes it.
-  leaveGroup: (groupId: string) => Promise<void>
+  // Signs out when no recipe note is left.
+  leaveGroup: (groupId: string) => Promise<'switched' | 'signed_out'>
   // Owners only; removes another member. The server rejects everyone else.
   removeMember: (groupId: string, userId: string) => Promise<void>
 }

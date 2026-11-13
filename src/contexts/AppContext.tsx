@@ -362,16 +362,22 @@ export function AppProvider({ children }: PropsWithChildren) {
     return renamed
   }, [isDemoUser, user])
 
-  // Leaves a recipe note (an owner alone deletes it; the server checks), then
-  // reloads the notes: the oldest remaining one opens, or none, which leads to
-  // the setup page.
+  // Leaves a recipe note (an owner alone deletes it; the server checks). If a
+  // note remains, the oldest one opens; if none does, the user is signed out
+  // rather than left on the setup page.
   const leaveGroup = useCallback(async (groupId: string) => {
     if (!user) throw new Error('ログインが必要です。')
     if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
     const { error } = await getSupabase().rpc('leave_group', { p_group_id: groupId })
     if (error) throw error
+    const remaining = await getSupabaseGroups(user.id)
+    if (!remaining.length) {
+      await signOut()
+      return 'signed_out' as const
+    }
     await loadGroup(user)
-  }, [isDemoUser, loadGroup, user])
+    return 'switched' as const
+  }, [isDemoUser, loadGroup, signOut, user])
 
   // Removes another member of a recipe note. Owners only; the server checks.
   const removeMember = useCallback(async (groupId: string, userId: string) => {

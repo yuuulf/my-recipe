@@ -3,11 +3,11 @@
 ## 1. マイグレーション
 
 - [x] 1.1 `supabase/migrations/20261115000000_add_leave_and_remove_member.sql` に `leave_group` と `remove_group_member` を追加する（design の決定1）。`npm run db:reset` でマイグレーションと seed がエラーなしで当たることを確かめる
-- [x] 1.2 `supabase/tests/leave_and_remove.test.sql` を書く（design の決定5）。`npm run db:test` が通ること、`leave_group` のオーナーの判定を外すとテストが失敗することを確かめ、`npm run db:reset` で戻す
+- [x] 1.2 `supabase/tests/leave_and_remove.test.sql` を書く（design の決定6）。`npm run db:test` が通ること、`leave_group` のオーナーの判定を外すとテストが失敗することを確かめ、`npm run db:reset` で戻す
 
 ## 2. 共通の確認の画面
 
-- [x] 2.1 `src/components/ConfirmDialog.tsx` を作り、テストを書く（design の決定3、5）。`npm test` が通ることを確かめる
+- [x] 2.1 `src/components/ConfirmDialog.tsx` を作り、テストを書く（design の決定3、6）。`npm test` が通ることを確かめる
 - [x] 2.2 `RecipeDetailPage.tsx` の削除の確認を `ConfirmDialog` に置き換える。`npm run build` が通ること、Supabase Local でレシピの削除の確認（キャンセル、背景、削除）がいままでどおり動くことを確かめる
 
 ## 3. 退出と削除
@@ -15,6 +15,8 @@
 - [x] 3.1 `AppContext` と `app-context.ts` に `leaveGroup` と `removeMember` を足し、`src/test/appContextValue.ts` にも足す（design の決定2）。`npm run build` と `npm test` が通ることを確かめる
 - [x] 3.2 設定画面に、メンバーを外す操作と確認を足す（design の決定4）。`SettingsPage` のテスト（オーナーにだけ自分以外の外すボタン、メンバーとデモには出ない、確認の後に `removeMember`）を書き、`npm test` が通ることを確かめる
 - [x] 3.3 設定画面に、退出のカードと確認を足す（design の決定4）。テスト（メンバーは「退出する」、ほかにメンバーがいるオーナーは無効と理由、1人のオーナーは「削除して退出する」、デモには出ない、確認の後に `leaveGroup` と `/recipes` への移動）を書き、`npm test` が通ることを確かめる
+- [x] 3.4 退出で所属が0になったら、ログアウトしてログイン画面に移るようにする（`leaveGroup` の戻り値、design の決定2）。`SettingsPage` のテスト（所属が残れば `/recipes`、残らなければ `/login`）を足し、`npm test` が通ることを確かめる
+- [x] 3.5 セットアップ画面にログアウトを置く（design の決定5）。`SetupPage` のテスト（`signOut` と `/login` への移動）を書き、`npm test` が通ることを確かめる
 
 ## 4. 説明
 
@@ -29,6 +31,11 @@
   - 確認結果: 自動で確かめた（利用者と相談して決定）。テスト用のセッションでヘッドレスの Chrome を DevTools Protocol で操作した。サンプルのレシピノートのオーナーが「ゆきを外す」を選ぶと、確認に「ゆきさんを外しますか？」と出て、外すとメンバー数が3人から2人になり、ゆきの行が消えた。ゆきが登録した「だし巻き卵」の登録者は「メンバー」になった。ゆきとして開き直すと、切り替えの一覧はゆきのノートだけで、サンプルのレシピノートのレシピの URL は「レシピが見つかりません」になった。スマホ幅（390px）とPC幅（1280px）のスクリーンショットで、メンバーの行の外すボタン、退出のカード、確認の画面が崩れないことを確かめ、390px で横にはみ出さなかった
 - [x] 5.4 デモモードで、設定画面に退出とメンバーを外す操作が出ないこと、レシピの詳細の削除の操作がいままでどおり出ないことを確かめる
   - 確認結果: 自動で確かめた（利用者と相談して決定）。テスト用のセッションでヘッドレスの Chrome を DevTools Protocol で操作した。デモモードの設定画面に、退出のカード・退出のボタン・外すボタンは出なかった（メンバーの一覧はいまどおり3人）。レシピの詳細の削除のボタンもいまどおり出なかった
+
+## 6. 追加の確認（ログアウト）
+
+- [x] 6.1 Supabase Local で、最後のレシピノートから退出するとログアウトしてログイン画面に移ること（メンバー、1人だけのオーナーの両方）、どこにも所属していない利用者がセットアップ画面からログアウトできることを確かめる。`npm run lint`、`npm run build`、`npm test`、`npm run db:test` がエラーなしで通ることを確かめる
+  - 確認結果: 自動で確かめた（利用者と相談して決定）。テスト用のセッションでヘッドレスの Chrome を DevTools Protocol で操作した。ゆきのノートだけに参加した利用者が退出すると、ログイン画面（「レシピノートをひらく」）に移り、ブラウザのセッションも消えた。自分で作ったレシピノートだけの利用者が「削除して退出する」を選ぶと、同じくログイン画面に移り、レシピノートはデータベースから消えた。どこにも所属していない利用者のセットアップ画面に「ログアウト」が出て、押すとログイン画面に移りセッションが消えた。ログアウトのボタンは、上の行のアイコンと左端がそろうよう位置を直した。`npm run lint`、`npm run build`、`npm test`（76件）、`npm run db:test`（87件）が通った
 
 ## Workflow follow-up
 

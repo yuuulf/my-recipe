@@ -87,9 +87,9 @@ export function SettingsPage() {
     setLeaving(true)
     setLeaveError('')
     try {
-      await leaveGroup(group.id)
-      // Another note opens, or the setup page when none is left.
-      navigate('/recipes', { replace: true })
+      const result = await leaveGroup(group.id)
+      // Another note opens; with none left the user has been signed out.
+      navigate(result === 'signed_out' ? '/login' : '/recipes', { replace: true })
     } catch (error) {
       setLeaveError(getErrorMessage(error, 'レシピノートから退出できませんでした。'))
       setLeaving(false)
