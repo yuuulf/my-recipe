@@ -42,6 +42,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Outgoing connections (such as image pulls) take ports from 32768-60999,
+      # which includes Supabase Local's 54321-54324, so the database container
+      # can fail with "address already in use". Keep them out of that range.
+      - run: sudo sysctl -w net.ipv4.ip_local_port_range="60100 65000"
       # Applies the migrations and supabase/seed.sql. Only the services the
       # database tests need are started.
       - run: npx supabase start -x studio,imgproxy,mailpit,realtime,storage-api,edge-runtime,logflare,vector,supavisor,postgres-meta

@@ -106,6 +106,7 @@
 - **app**: `actions/checkout@v4`、`actions/setup-node@v4`（Node.js 22、npm のキャッシュ）、`npm ci`、`npm run lint`、`npm run build`、`npm test`
 - **db**: `npm ci` の後、`npx supabase start` で Supabase Local を起動し、`npx supabase test db` を実行する
   - 使わないサービスは起動しない（`-x studio,imgproxy,mailpit,realtime,storage-api,edge-runtime,logflare,vector,supavisor,postgres-meta`）。認証のサービスは、マイグレーションと seed が `auth` スキーマを使うので残す
+  - 起動の前に、ランナーの外向きの接続が使うポートの範囲を 60100〜65000 に変える（`sysctl net.ipv4.ip_local_port_range`）。既定の範囲（32768〜60999）は Supabase Local のポート（54321〜54324）を含み、イメージの取得中の接続がそれを使うと、データベースが起動できないことがある（PR #18 の2回目の実行で起きた）
   - `config.toml` が読む Google の OAuth の値は、ダミーの値を環境変数で渡す（`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID`、`SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET`）。本物の秘密は使わない
 - 権限は `contents: read` だけにする。同じ PR で古い実行が残らないよう、`concurrency` で前の実行を止める
 
