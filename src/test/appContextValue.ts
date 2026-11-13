@@ -29,5 +29,7 @@ export const appContextValue = (overrides: Partial<AppContextValue> = {}): AppCo
   refreshGroup: vi.fn(async () => {}),
   selectGroup: vi.fn(async () => {}),
   renameGroup: vi.fn(async () => testGroup),
+  leaveGroup: vi.fn(async () => {}),
+  removeMember: vi.fn(async () => {}),
   ...overrides,
 })

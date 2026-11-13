@@ -1,8 +1,8 @@
 import { ArrowLeft, Clock3, Edit3, ExternalLink, FileText, MoreHorizontal, NotebookPen, Trash2, UsersRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Button } from '../components/Button'
 import { buttonClassName } from '../components/buttonStyles'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { EmptyState } from '../components/EmptyState'
 import { PageLoader } from '../components/Loading'
 import { AppShell } from '../components/Layout/AppShell'
@@ -152,14 +152,15 @@ export function RecipeDetailPage() {
       ) : null}
 
       {showDeleteConfirm ? (
-        <div className="fixed inset-0 z-20 grid place-items-center bg-text/38 p-5 backdrop-blur-[3px]" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowDeleteConfirm(false) }}>
-          <div className="w-full max-w-97.5 rounded-lg bg-surface p-7 text-center shadow-md" role="dialog" aria-modal="true" aria-labelledby="delete-title">
-            <div className="mx-auto mb-3.5 grid size-10.5 place-items-center rounded-md bg-danger-soft text-danger"><Trash2 size={20} /></div>
-            <h2 id="delete-title" className="mb-1.75 text-20 font-bold text-text">レシピを削除しますか？</h2>
-            <p className="text-14 text-text-secondary">「{recipe?.title}」を削除すると、元に戻せません。</p>
-            <div className="mt-5.75 flex justify-center gap-2"><Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>キャンセル</Button><Button variant="danger" loading={deleting} onClick={() => void handleDelete()}>削除する</Button></div>
-          </div>
-        </div>
+        <ConfirmDialog
+          icon={<Trash2 size={20} />}
+          title="レシピを削除しますか？"
+          description={`「${recipe?.title}」を削除すると、元に戻せません。`}
+          confirmLabel="削除する"
+          loading={deleting}
+          onConfirm={() => void handleDelete()}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
       ) : null}
     </AppShell>
   )
