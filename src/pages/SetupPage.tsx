@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BookOpen, UsersRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, LogOut, UsersRound } from 'lucide-react'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
@@ -8,8 +8,11 @@ import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { RECIPE_NOTE_NAME_MAX } from '../features/groups/recipeNoteLimits'
 
+// A text button at the end of the account line, the same size as that line.
+const signOutButtonClassName = 'inline-flex flex-none items-center gap-1.75 bg-transparent text-12 text-text-secondary transition-[color] duration-180 ease-[ease] hover:text-primary'
+
 export function SetupPage() {
-  const { createGroup, groups, groupLoading, user, isDemoUser } = useApp()
+  const { createGroup, groups, groupLoading, user, isDemoUser, signOut } = useApp()
   const navigate = useNavigate()
   const [groupName, setGroupName] = useState('')
   const [error, setError] = useState('')
@@ -20,6 +23,12 @@ export function SetupPage() {
 
   // A user who already belongs to a recipe note is creating another one.
   const hasNotes = groups.length > 0
+
+  // Without a recipe note there is no other way to sign out from here.
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login', { replace: true })
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -55,7 +64,12 @@ export function SetupPage() {
         </form>
         <div className="mt-6.75 grid gap-2.25 border-t border-border pt-5 text-12 text-text-secondary">
           <div className="flex items-center gap-1.75"><UsersRound size={16} className="text-primary" /><span>あとからメンバーを招待できます</span></div>
-          <div className="flex items-center gap-1.75"><BookOpen size={16} className="text-primary" /><span>{user?.email} で作成します</span></div>
+          <div className="flex items-center gap-1.75">
+            <BookOpen size={16} className="flex-none text-primary" />
+            {/* Wraps between the address and 「で作成します」 first; only a very long address breaks inside. */}
+            <span className="min-w-0 flex-1 wrap-anywhere">{user?.email} <span className="whitespace-nowrap">で作成します</span></span>
+            <button type="button" className={signOutButtonClassName} onClick={() => void handleSignOut()}><LogOut size={16} /> ログアウト</button>
+          </div>
         </div>
       </div>
     </div>

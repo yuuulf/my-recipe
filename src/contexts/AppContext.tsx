@@ -362,6 +362,41 @@ export function AppProvider({ children }: PropsWithChildren) {
     return renamed
   }, [isDemoUser, user])
 
+  // Leaves a recipe note (an owner alone deletes it; the server checks). If a
+  // note remains, the oldest one opens; if none does, the user is signed out
+  // rather than left on the setup page.
+  const leaveGroup = useCallback(async (groupId: string) => {
+    if (!user) throw new Error('ログインが必要です。')
+    if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
+    const { error } = await getSupabase().rpc('leave_group', { p_group_id: groupId })
+    if (error) throw error
+    const remaining = await getSupabaseGroups(user.id)
+    if (!remaining.length) {
+      await signOut()
+      return 'signed_out' as const
+    }
+    await loadGroup(user)
+    return 'switched' as const
+  }, [isDemoUser, loadGroup, signOut, user])
+
+  // Removes another member of a recipe note. Owners only; the server checks.
+  const removeMember = useCallback(async (groupId: string, userId: string) => {
+    if (!user) throw new Error('ログインが必要です。')
+    if (isDemoUser) throw new Error('デモモードではレシピノートを変更できません。')
+    const { error } = await getSupabase().rpc('remove_group_member', { p_group_id: groupId, p_user_id: userId })
+    if (error) throw error
+    if (groupId !== group?.id) return
+    // Reload the open note's members, dropping the result if the user switched meanwhile.
+    membersRequestRef.current = groupId
+    setMembersLoading(true)
+    try {
+      const nextMembers = await getSupabaseMembers(groupId)
+      if (membersRequestRef.current === groupId) setMembers(nextMembers)
+    } finally {
+      if (membersRequestRef.current === groupId) setMembersLoading(false)
+    }
+  }, [group?.id, isDemoUser, user])
+
   const refreshGroup = useCallback(async () => {
     if (isDemoUser) {
       setGroups([getDemoGroup()])
@@ -391,6 +426,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     refreshGroup,
     renameGroup,
     selectGroup,
+    leaveGroup,
+    removeMember,
   }), [
     authReady,
     activateDemo,
@@ -401,9 +438,11 @@ export function AppProvider({ children }: PropsWithChildren) {
     groups,
     isDemoUser,
     joinGroup,
+    leaveGroup,
     members,
     membersLoading,
     refreshGroup,
+    removeMember,
     renameGroup,
     selectGroup,
     signInWithGoogle,

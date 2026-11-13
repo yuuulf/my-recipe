@@ -24,6 +24,11 @@ export type AppContextValue = {
   selectGroup: (groupId: string) => Promise<void>
   // Owners only; the server rejects everyone else.
   renameGroup: (groupId: string, name: string) => Promise<Group>
+  // Leaves a recipe note. An owner can leave only when alone, which deletes it.
+  // Signs out when no recipe note is left.
+  leaveGroup: (groupId: string) => Promise<'switched' | 'signed_out'>
+  // Owners only; removes another member. The server rejects everyone else.
+  removeMember: (groupId: string, userId: string) => Promise<void>
 }
 
 export const AppContext = createContext<AppContextValue | null>(null)
