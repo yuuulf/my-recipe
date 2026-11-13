@@ -56,9 +56,13 @@ const sectionMarkerClassName = (tone: 'primary' | 'info' = 'primary') =>
 const sectionHeadingClassName = 'mt-1.25 mb-1.75 font-bold tracking-[-.03em] text-text'
 // Keeps the 22px gap between a section heading and its row editor.
 const sectionBodyClassName = 'mt-3.75'
+// The first field's label sits beside the section icon and looks like the other sections' headings.
+const titleLabelClassName = `${sectionHeadingClassName} flex items-center gap-1.25 text-20`
 const numberInputClassName = (error: boolean) => `${textInputClassName({ error, fullWidth: false })} mt-1.75 block w-full sm:w-32.5`
 
 type RecipeFormProps = {
+  // The page heading, read by screen readers only (「レシピを追加」 or 「レシピを編集」).
+  title: string
   defaultValues?: RecipeFormValues
   submitLabel: string
   onSubmit: (values: RecipeFormValues) => Promise<void>
@@ -67,7 +71,7 @@ type RecipeFormProps = {
   draftAssist?: boolean
 }
 
-export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave = false, draftAssist = false }: RecipeFormProps) {
+export function RecipeForm({ title, defaultValues, submitLabel, onSubmit, disableSave = false, draftAssist = false }: RecipeFormProps) {
   const [submitError, setSubmitError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const { register, handleSubmit, watch, setValue, reset, formState: { errors, isDirty } } = useForm<RecipeFormValues>({
@@ -149,6 +153,8 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
 
   return (
     <form className="mx-auto max-w-210" onSubmit={(event) => void handleSubmit(submit)(event)}>
+      {/* The fields speak for themselves; the heading is kept for screen readers. */}
+      <h1 className="sr-only">{title}</h1>
       <div className="mb-7.5 flex items-center justify-between gap-5 sm:mb-9">
         <Link to="/recipes" className={backLinkClassName}><ArrowLeft size={17} /> 一覧に戻る</Link>
         <Button type="submit" size="compact-short" loading={isSaving} disabled={disableSave}>{submitLabel}</Button>
@@ -162,8 +168,7 @@ export function RecipeForm({ defaultValues, submitLabel, onSubmit, disableSave =
       <section className={sectionClassName}>
         <div className={sectionMarkerClassName()}><BookOpen size={17} /></div>
         <div>
-          <h1 className={`${sectionHeadingClassName} text-26 sm:text-28`}>料理の記録を残す</h1>
-          <label className={`${fieldLabelClassName} ${requiredMarkClassName}`}>料理名</label>
+          <label className={`${titleLabelClassName} ${requiredMarkClassName}`}>料理名</label>
           <input className={textInputClassName({ error: Boolean(errors.title), size: 'title' })} placeholder="例：豚の生姜焼き" autoFocus {...register('title')} />
           {errors.title ? <span className={fieldErrorClassName}>{errors.title.message}</span> : null}
           <label className={fieldLabelClassName}>ひとこと説明 <span>任意</span></label>

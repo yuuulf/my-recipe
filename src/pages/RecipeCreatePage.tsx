@@ -11,6 +11,7 @@ export function RecipeCreatePage() {
   return (
     <AppShell>
       <RecipeForm
+        title="レシピを追加"
         submitLabel="レシピを保存"
         disableSave={isDemoUser}
         draftAssist

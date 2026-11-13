@@ -50,6 +50,7 @@ export function RecipeEditPage() {
       {!loading && error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
       {!loading && values && id ? (
         <RecipeForm
+          title="レシピを編集"
           defaultValues={values}
           submitLabel="変更を保存"
           disableSave={isDemoUser}

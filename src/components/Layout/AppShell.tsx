@@ -10,7 +10,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../../contexts/app-context'
 import { RecipeNoteSwitcher } from '../../features/groups/components/RecipeNoteSwitcher'
 import { BrandLockup } from '../BrandLockup'
-import { eyebrowClassName, iconButtonClassName } from '../styles'
+import { iconButtonClassName } from '../styles'
 
 const navItems = [
   { to: '/recipes', label: 'レシピ一覧', icon: BookOpen },
@@ -40,7 +40,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <BrandLockup variant="full" />
 
         <div className="mt-10.5 mb-6.25">
-          <span className={`${eyebrowClassName} mb-1.5 px-1`}>選択中のレシピノート</span>
           <RecipeNoteSwitcher variant="sidebar" />
         </div>
 
