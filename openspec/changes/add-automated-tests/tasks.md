@@ -32,7 +32,8 @@
 ## 6. CI と説明
 
 - [x] 6.1 手元で `npx supabase stop` の後、design の決定7と同じ `npx supabase start -x ...`（Google の値はダミー）で起動し、`npx supabase test db` が通ることを確かめる。確かめた後は、いつもの `npm run db:start` で起動し直す
-- [ ] 6.2 `.github/workflows/ci.yml` を足す（design の決定7）。PR を作って app と db の2つのジョブが通ることを確かめる（PR の作成は 7章の後でもよい）
+- [x] 6.2 `.github/workflows/ci.yml` を足す（design の決定7）。PR を作って app と db の2つのジョブが通ることを確かめる（PR の作成は 7章の後でもよい）
+  - 確認結果: PR #18 で CI が動き、app のジョブ（lint、build、Vitest 10ファイル・55件、19秒）と db のジョブ（Supabase Local の起動と pgTAP 4ファイル・65件、1分22秒）の両方が通った
 - [x] 6.3 AGENTS.md の Testing Guidelines と README のコマンドの表を更新する（design の決定8）。書いたコマンドがそのとおりに動くことを確かめる
 
 ## 7. 確認
