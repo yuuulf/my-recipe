@@ -2,7 +2,7 @@ import { FunctionsHttpError } from '@supabase/supabase-js'
 import { getSupabase } from '../../../lib/supabase'
 import type { RecipeFormValues } from '../../../types/database'
 
-// Keep in sync with MAX_TEXT_LENGTH in supabase/functions/recipe-draft/index.ts.
+// Keep in sync with MAX_TEXT_LENGTH in supabase/functions/recipe-draft/draft.ts.
 export const RECIPE_DRAFT_MAX_LENGTH = 8000
 
 export type RecipeDraftErrorCode =
