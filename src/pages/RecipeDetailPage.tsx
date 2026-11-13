@@ -7,7 +7,7 @@ import { EmptyState } from '../components/EmptyState'
 import { PageLoader } from '../components/Loading'
 import { AppShell } from '../components/Layout/AppShell'
 import { backLinkClassName, eyebrowClassName, iconButtonClassName, tagClassName, tagRowClassName } from '../components/styles'
-import { useApp } from '../contexts/app-context'
+import { getMemberDisplayName, useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { deleteRecipe, getRecipe } from '../features/recipes/api/recipes'
 import type { Recipe } from '../types/database'
@@ -34,7 +34,12 @@ const stepItemClassName = [
 
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { group, groups, selectGroup, user, isDemoUser } = useApp()
+  const { group, groups, members, membersLoading, selectGroup, user, isDemoUser } = useApp()
+  // The member who created the recipe; a former member is shown as 「メンバー」.
+  const creatorName = (userId: string) => {
+    const creator = members.find((member) => member.user_id === userId)
+    return creator ? getMemberDisplayName(creator, user) : 'メンバー'
+  }
   const navigate = useNavigate()
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(true)
@@ -142,7 +147,7 @@ export function RecipeDetailPage() {
             </div>
           ) : null}
 
-          <footer className="flex flex-col gap-1.25 pt-1 text-12 text-text-muted sm:flex-row sm:gap-4.5"><span>登録者 {user?.displayName || 'メンバー'}</span><span>最終更新 {formatDate(recipe.updated_at)}</span></footer>
+          <footer className="flex flex-col gap-1.25 pt-1 text-12 text-text-muted sm:flex-row sm:gap-4.5">{membersLoading || recipe.group_id !== group?.id ? null : <span>登録者 {creatorName(recipe.created_by)}</span>}<span>最終更新 {formatDate(recipe.updated_at)}</span></footer>
         </article>
       ) : null}
 

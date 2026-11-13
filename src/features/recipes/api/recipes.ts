@@ -3,6 +3,7 @@ import {
   getDemoRecipes,
 } from '../../../lib/demoData'
 import { getSupabase } from '../../../lib/supabase'
+import { isUuid } from '../../../lib/uuid'
 import type { Recipe, RecipeFormValues } from '../../../types/database'
 
 const cleanList = (values: string[]) => values.map((value) => value.trim()).filter(Boolean)
@@ -61,6 +62,8 @@ export const getRecipes = async (groupId: string, query = '', isDemoUser = false
 
 export const getRecipe = async (id: string, isDemoUser = false): Promise<Recipe | null> => {
   if (isDemoUser) return getDemoRecipe(id)
+  // Not a recipe ID: treat it as not found instead of asking the database.
+  if (!isUuid(id)) return null
   const { data, error } = await getSupabase()
     .from('recipes')
     .select('*')

@@ -32,7 +32,9 @@ export function JoinGroupPage() {
     let active = true
     void getInviteGroup(token)
       .then((group) => {
-        if (active) setInviteGroup(group)
+        if (!active) return
+        setInviteGroup(group)
+        if (!group) setError('招待リンクのURLが正しくないか、レシピノートが見つかりません。')
       })
       .catch((loadError: unknown) => { if (active) setError(getErrorMessage(loadError, '招待リンクを確認できませんでした。')) })
       .finally(() => { if (active) setLoading(false) })

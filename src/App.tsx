@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { GroupLoadError } from './components/GroupLoadError'
 import { PageLoader } from './components/Loading'
 import { AppProvider } from './contexts/AppContext'
 import { useApp } from './contexts/app-context'
@@ -16,9 +17,10 @@ import { SupabaseSetupPage } from './pages/SupabaseSetupPage'
 import { TermsPage } from './pages/TermsPage'
 
 function RootRedirect() {
-  const { user, group, authReady, groupLoading } = useApp()
+  const { user, group, authReady, groupLoading, groupError } = useApp()
   if (!authReady || (user && groupLoading)) return <PageLoader />
   if (!user) return <Navigate to="/login" replace />
+  if (groupError) return <GroupLoadError />
   return <Navigate to={group ? '/recipes' : '/setup'} replace />
 }
 
@@ -31,8 +33,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 function GroupGuard({ children }: { children: React.ReactNode }) {
-  const { group, groupLoading } = useApp()
+  const { group, groupLoading, groupError } = useApp()
   if (groupLoading) return <PageLoader />
+  // A failed load is not the same as having no recipe note: offer a retry.
+  if (groupError) return <GroupLoadError />
   if (!group) return <Navigate to="/setup" replace />
   return children
 }

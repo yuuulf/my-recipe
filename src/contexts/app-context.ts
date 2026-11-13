@@ -8,8 +8,12 @@ export type AppContextValue = {
   // The open recipe note.
   group: Group | null
   members: GroupMember[]
+  // True while the open recipe note's members are loading.
+  membersLoading: boolean
   authReady: boolean
   groupLoading: boolean
+  // Loading the recipe notes failed; refreshGroup tries again.
+  groupError: boolean
   isDemoUser: boolean
   enterDemo: () => void
   signInWithGoogle: (redirectPath?: string) => Promise<void>
