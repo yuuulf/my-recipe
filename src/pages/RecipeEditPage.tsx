@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../components/Layout/AppShell'
 import { PageLoader } from '../components/Loading'
@@ -16,9 +16,12 @@ export function RecipeEditPage() {
   const [values, setValues] = useState<RecipeFormValues | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  // The recipe whose values are in the form. Switching the open recipe note or
+  // other context updates must not reload it and replace what the user typed.
+  const loadedRecipeIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!id || loadedRecipeIdRef.current === id) return
     let active = true
     void getRecipe(id, isDemoUser)
       .then((recipe) => {
@@ -29,8 +32,12 @@ export function RecipeEditPage() {
           setError('レシピが見つかりません。')
           return
         }
-        if (inOtherNote) void selectGroup(recipe.group_id)
+        loadedRecipeIdRef.current = id
         setValues(recipeToFormValues(recipe))
+        // Switching the note re-runs this effect, which then stops early, so
+        // finish loading here rather than relying on this run staying active.
+        setLoading(false)
+        if (inOtherNote) void selectGroup(recipe.group_id)
       })
       .catch((loadError: unknown) => { if (active) setError(getErrorMessage(loadError, 'レシピを読み込めませんでした。')) })
       .finally(() => { if (active) setLoading(false) })

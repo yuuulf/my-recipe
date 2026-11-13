@@ -17,10 +17,14 @@ const footnoteClassName = 'mt-4.5 flex gap-1.5 text-12 leading-[1.6] text-text-m
 const inviteLinkBoxClassName = 'flex min-w-0 items-center gap-2 rounded-sm border border-border bg-surface-muted px-3 py-2.75 font-mono text-12 text-text-secondary'
 
 export function SettingsPage() {
-  const { group, members, signOut, user, isDemoUser } = useApp()
+  const { group, members, membersLoading, signOut, user, isDemoUser } = useApp()
   const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
   const isOwner = members.some((member) => member.user_id === user?.id && member.role === 'owner')
+  const owner = members.find((member) => member.role === 'owner')
+  // Until the members are loaded, the owner and the count are unknown.
+  const ownerName = membersLoading ? '…' : owner ? getMemberDisplayName(owner, user) : 'メンバー'
+  const memberCount = membersLoading ? '…' : `${members.length}人`
   const inviteUrl = isDemoUser
     ? `${window.location.origin}/login`
     : group
@@ -60,13 +64,13 @@ export function SettingsPage() {
             {group ? <RecipeNoteNameHeading key={group.id} group={group} canRename={isOwner && !isDemoUser} titleClassName={cardTitleClassName} /> : null}
           </div>
           <div className="mt-5.5 mb-3.25 h-px bg-border" />
-          <div className={detailRowClassName}><span>オーナー</span><strong>{members.find((member) => member.role === 'owner') ? getMemberDisplayName(members.find((member) => member.role === 'owner')!, user) : user?.displayName}</strong></div>
-          <div className={detailRowClassName}><span>メンバー数</span><strong>{members.length}人</strong></div>
+          <div className={detailRowClassName}><span>オーナー</span><strong>{ownerName}</strong></div>
+          <div className={detailRowClassName}><span>メンバー数</span><strong>{memberCount}</strong></div>
           {isDemoUser ? <p className={footnoteClassName}><ShieldCheck size={14} /> デモモードの固定データを表示しています。</p> : null}
         </section>
 
         <section className={cardClassName}>
-          <div className={cardHeadingClassName}><div className={cardIconClassName('info')}><UserRound size={19} /></div><h2 className={cardTitleClassName}>メンバー</h2><span className="ml-auto min-w-6.5 rounded-full bg-primary-soft px-1.75 py-0.75 text-center text-12 text-primary-hover">{members.length}</span></div>
+          <div className={cardHeadingClassName}><div className={cardIconClassName('info')}><UserRound size={19} /></div><h2 className={cardTitleClassName}>メンバー</h2><span className="ml-auto min-w-6.5 rounded-full bg-primary-soft px-1.75 py-0.75 text-center text-12 text-primary-hover">{membersLoading ? '…' : members.length}</span></div>
           <div className="mt-5 grid gap-1.5">
             {members.map((member) => (
               <div className="flex items-center gap-2.5 border-t border-surface-muted py-2.25" key={`${member.group_id}-${member.user_id}`}>

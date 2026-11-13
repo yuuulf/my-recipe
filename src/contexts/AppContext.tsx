@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react'
@@ -99,6 +100,9 @@ const getSupabaseMembers = async (groupId: string): Promise<GroupMember[]> => {
 const getSessionUser = (session: Session | null) =>
   session?.user ? mapUser(session.user) : null
 
+const isSameUser = (a: AppUser | null, b: AppUser | null) =>
+  a !== null && b !== null && a.id === b.id && a.email === b.email && a.displayName === b.displayName
+
 export function AppProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<AppUser | null>(null)
   const [groups, setGroups] = useState<Group[]>([])
@@ -106,7 +110,15 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [members, setMembers] = useState<GroupMember[]>([])
   const [authReady, setAuthReady] = useState(false)
   const [groupLoading, setGroupLoading] = useState(false)
+  // The last load of the user's recipe notes failed. Not the same as having none.
+  const [groupError, setGroupError] = useState(false)
   const [isDemoUser, setIsDemoUser] = useState(() => isDemoSessionActive())
+  // Members of the open recipe note are being loaded; until then they are unknown.
+  const [membersLoading, setMembersLoading] = useState(false)
+  // The recipe note whose members were requested last. Older results are dropped.
+  const membersRequestRef = useRef<string | null>(null)
+  // The user whose recipe notes were last loaded from a session event.
+  const loadedUserIdRef = useRef<string | null>(null)
 
   // Loads the user's recipe notes and opens one: the preferred one, else the
   // remembered one, else the oldest membership.
@@ -115,10 +127,14 @@ export function AppProvider({ children }: PropsWithChildren) {
       setGroups([])
       setGroup(null)
       setMembers([])
+      setGroupError(false)
+      membersRequestRef.current = null
+      setMembersLoading(false)
       return
     }
 
     setGroupLoading(true)
+    setGroupError(false)
     try {
       const nextGroups = await getSupabaseGroups(nextUser.id)
       const wantedId = preferredGroupId ?? readStoredGroupId(nextUser.id)
@@ -128,19 +144,39 @@ export function AppProvider({ children }: PropsWithChildren) {
 
       if (nextGroup) {
         storeGroupId(nextUser.id, nextGroup.id)
-        setMembers(await getSupabaseMembers(nextGroup.id))
+        membersRequestRef.current = nextGroup.id
+        setMembersLoading(true)
+        try {
+          const nextMembers = await getSupabaseMembers(nextGroup.id)
+          if (membersRequestRef.current === nextGroup.id) setMembers(nextMembers)
+        } finally {
+          if (membersRequestRef.current === nextGroup.id) setMembersLoading(false)
+        }
       } else {
+        membersRequestRef.current = null
         setMembers([])
       }
     } catch (error) {
+      // Keep what was loaded before; the guard shows the failure with a retry.
       console.error('Failed to load group', error)
-      setGroups([])
-      setGroup(null)
-      setMembers([])
+      setGroupError(true)
     } finally {
       setGroupLoading(false)
     }
   }, [])
+
+  // Applies the user of a session event. Token refreshes and repeated events
+  // for the same user keep the screen as it is: the recipe notes are loaded
+  // only when the user changes (sign-in, sign-out, another account).
+  const applySessionUser = useCallback((nextUser: AppUser | null) => {
+    setIsDemoUser(false)
+    // Keep the same object so callbacks depending on the user stay the same.
+    setUser((current) => (isSameUser(current, nextUser) ? current : nextUser))
+    const nextUserId = nextUser?.id ?? null
+    if (nextUserId === loadedUserIdRef.current) return
+    loadedUserIdRef.current = nextUserId
+    void loadGroup(nextUser)
+  }, [loadGroup])
 
   // Opens another recipe note the user belongs to and remembers it.
   const selectGroup = useCallback(async (groupId: string) => {
@@ -150,10 +186,16 @@ export function AppProvider({ children }: PropsWithChildren) {
     setGroup(nextGroup)
     setMembers([])
     storeGroupId(user.id, nextGroup.id)
+    membersRequestRef.current = nextGroup.id
+    setMembersLoading(true)
     try {
-      setMembers(await getSupabaseMembers(nextGroup.id))
+      const nextMembers = await getSupabaseMembers(nextGroup.id)
+      // Switched again meanwhile: these members belong to another recipe note.
+      if (membersRequestRef.current === nextGroup.id) setMembers(nextMembers)
     } catch (error) {
       console.error('Failed to load members', error)
+    } finally {
+      if (membersRequestRef.current === nextGroup.id) setMembersLoading(false)
     }
   }, [group?.id, groups, isDemoUser, user])
 
@@ -164,7 +206,10 @@ export function AppProvider({ children }: PropsWithChildren) {
     setGroups([getDemoGroup()])
     setGroup(getDemoGroup())
     setMembers(getDemoMembers())
+    membersRequestRef.current = null
+    setMembersLoading(false)
     setGroupLoading(false)
+    setGroupError(false)
     setAuthReady(true)
   }, [])
 
@@ -193,11 +238,8 @@ export function AppProvider({ children }: PropsWithChildren) {
         activateDemo()
         return
       }
-      const nextUser = getSessionUser(session)
       if (!mounted) return
-      setIsDemoUser(false)
-      setUser(nextUser)
-      void loadGroup(nextUser)
+      applySessionUser(getSessionUser(session))
     })
 
     void supabase.auth.getSession().then(({ data: sessionData }) => {
@@ -206,23 +248,21 @@ export function AppProvider({ children }: PropsWithChildren) {
         activateDemo()
         return
       }
-      const nextUser = getSessionUser(sessionData.session)
-      setIsDemoUser(false)
-      setUser(nextUser)
+      applySessionUser(getSessionUser(sessionData.session))
       setAuthReady(true)
-      void loadGroup(nextUser)
     })
 
     return () => {
       mounted = false
       data.subscription.unsubscribe()
     }
-  }, [activateDemo, loadGroup])
+  }, [activateDemo, applySessionUser])
 
   const signInWithGoogle = useCallback(async (redirectPath?: string) => {
     const client = getSupabase()
 
     if (isDemoSessionActive()) {
+      loadedUserIdRef.current = null
       setUser(null)
       setGroups([])
       setGroup(null)
@@ -250,11 +290,15 @@ export function AppProvider({ children }: PropsWithChildren) {
       if (error) throw error
     }
     clearDemoSession()
+    loadedUserIdRef.current = null
     setIsDemoUser(false)
     setUser(null)
     setGroups([])
     setGroup(null)
     setMembers([])
+    setGroupError(false)
+    membersRequestRef.current = null
+    setMembersLoading(false)
   }, [])
 
   const createGroup = useCallback(async (name: string) => {
@@ -336,6 +380,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     members,
     authReady,
     groupLoading,
+    groupError,
+    membersLoading,
     isDemoUser,
     enterDemo: activateDemo,
     signInWithGoogle,
@@ -350,11 +396,13 @@ export function AppProvider({ children }: PropsWithChildren) {
     activateDemo,
     createGroup,
     group,
+    groupError,
     groupLoading,
     groups,
     isDemoUser,
     joinGroup,
     members,
+    membersLoading,
     refreshGroup,
     renameGroup,
     selectGroup,
