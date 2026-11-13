@@ -6,7 +6,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { EmptyState } from '../components/EmptyState'
 import { PageLoader } from '../components/Loading'
 import { AppShell } from '../components/Layout/AppShell'
-import { backLinkClassName, eyebrowClassName, iconButtonClassName, tagClassName, tagRowClassName } from '../components/styles'
+import { backLinkClassName, iconButtonClassName, tagClassName, tagRowClassName } from '../components/styles'
 import { getMemberDisplayName, useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { deleteRecipe, getRecipe } from '../features/recipes/api/recipes'
@@ -115,14 +115,15 @@ export function RecipeDetailPage() {
           </div>
           <header className="flex justify-between gap-7.5 border-b border-border pb-6.75 sm:pb-7.5">
             <div className="min-w-0">
-              <span className={eyebrowClassName}>最終更新 {formatDate(recipe.updated_at)}</span>
-              <h1 className="mt-2.75 mb-2.25 text-30 leading-[1.2] font-bold tracking-[-.04em] text-text sm:text-[clamp(28px,4vw,38px)]">{recipe.title}</h1>
+              <h1 className="mb-2.25 text-30 leading-[1.2] font-bold tracking-[-.04em] text-text sm:text-[clamp(28px,4vw,38px)]">{recipe.title}</h1>
               {recipe.description ? <p className="text-15 leading-[1.6] text-text-secondary">{recipe.description}</p> : null}
-              <div className="mt-4.75 flex flex-wrap gap-3.75 text-14 text-text-secondary">
-                {recipe.cooking_time_minutes ? <span className={iconTextClassName}><Clock3 className="text-primary" size={17} /> {recipe.cooking_time_minutes}分</span> : null}
-                {recipe.servings ? <span className={iconTextClassName}><UsersRound className="text-primary" size={17} /> {recipe.servings}人分</span> : null}
-                <span className={iconTextClassName}><NotebookPen className="text-primary" size={17} /> {recipe.steps.length}ステップ</span>
-              </div>
+              {/* Shown only when there is a time or serving count; the step count is clear from the numbered steps. */}
+              {recipe.cooking_time_minutes || recipe.servings ? (
+                <div className="mt-4.75 flex flex-wrap gap-3.75 text-14 text-text-secondary">
+                  {recipe.cooking_time_minutes ? <span className={iconTextClassName}><Clock3 className="text-primary" size={17} /> {recipe.cooking_time_minutes}分</span> : null}
+                  {recipe.servings ? <span className={iconTextClassName}><UsersRound className="text-primary" size={17} /> {recipe.servings}人分</span> : null}
+                </div>
+              ) : null}
               {recipe.tags.length ? <div className={`${tagRowClassName} mt-4`}>{recipe.tags.map((tag) => <span className={tagClassName} key={tag}>#{tag}</span>)}</div> : null}
             </div>
             <div className="hidden flex-none flex-col items-end justify-end text-text-muted sm:flex" aria-hidden="true"><span className="text-11 tracking-[.08em]">NO.</span><strong className="text-38 leading-none font-bold text-border-strong">#{String(recipe.id).slice(-2).toUpperCase()}</strong></div>

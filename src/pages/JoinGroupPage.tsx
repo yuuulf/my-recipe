@@ -1,10 +1,10 @@
-import { ArrowRight, Check, Link2, LoaderCircle, UsersRound } from 'lucide-react'
+import { ArrowRight, Link2, LoaderCircle, UsersRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { BrandLockup } from '../components/BrandLockup'
 import { Button } from '../components/Button'
 import { buttonClassName } from '../components/buttonStyles'
-import { alertErrorClassName, eyebrowClassName } from '../components/styles'
+import { alertErrorClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { getInviteGroup } from '../features/groups/api/groups'
@@ -82,8 +82,7 @@ export function JoinGroupPage() {
         ) : null}
         {!loading && inviteGroup ? (
           <div>
-            <span className={eyebrowClassName}>YOU ARE INVITED</span>
-            <h1 className="mt-3 mb-3.25 text-28 leading-[1.3] font-bold tracking-[-.045em] text-text sm:text-30">「{inviteGroup.name}」に<br /><em className="text-primary not-italic">参加しますか？</em></h1>
+            <h1 className="mb-3.25 text-28 leading-[1.3] font-bold tracking-[-.045em] text-text sm:text-30">「{inviteGroup.name}」に<br /><em className="text-primary not-italic">参加しますか？</em></h1>
             <p className="text-14 leading-[1.85] text-text-secondary">このレシピノートのメンバーになると、みんなのレシピを見たり、新しい料理を追加できます。</p>
             {error ? <div className={alertErrorClassName} role="alert">{error}</div> : null}
             {user ? (
@@ -91,10 +90,6 @@ export function JoinGroupPage() {
             ) : (
               <Link to={loginPath} state={{ from: location.pathname }} className={buttonClassName('primary', 'mt-6 w-full', 'lg')}>ログインして参加する <ArrowRight size={17} /></Link>
             )}
-            <div className="mt-4 flex flex-wrap justify-center gap-3 text-12 text-text-muted">
-              <span className="inline-flex items-center gap-1"><Check className="text-primary" size={14} /> レシピを閲覧・追加</span>
-              <span className="inline-flex items-center gap-1"><Check className="text-primary" size={14} /> メンバーと共有</span>
-            </div>
           </div>
         ) : null}
       </div>

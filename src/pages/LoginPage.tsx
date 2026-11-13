@@ -126,10 +126,9 @@ export function LoginPage() {
         </div>
 
         <div className="mt-10.5 flex items-center gap-3 text-12 text-text-muted before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border sm:mt-12"><span>はじめて使う方へ</span></div>
-        <p className="mt-3.25 mb-3 text-center text-13 text-text-muted">ログイン後に、あなたのレシピノートを作成できます。</p>
         <Link
           to="/recipes?demo=1"
-          className="flex items-center justify-center gap-1.25 text-13 font-bold text-primary"
+          className="mt-3.25 flex items-center justify-center gap-1.25 text-13 font-bold text-primary"
           onClick={() => enterDemo()}
         >
           デモのレシピを見る <ArrowRight size={15} />

@@ -2,9 +2,6 @@
 // order, width in a row) stays with the caller unless every caller uses the
 // same value. Differences that would conflict with these classes are options.
 
-export const eyebrowClassName =
-  'block text-11 leading-[1.2] font-bold tracking-[.08em] text-text-muted'
-
 export const alertErrorClassName =
   'my-3.5 rounded-md border border-danger/30 bg-danger-soft px-3.25 py-2.75 text-14 leading-[1.6] text-danger-text'
 
@@ -73,6 +70,3 @@ export const pageHeaderClassName =
 
 export const pageTitleClassName =
   'mt-2.25 mb-1.75 text-28 leading-[1.2] font-bold tracking-[-.035em] text-text sm:text-[clamp(26px,3vw,30px)]'
-
-// Paragraphs here used the browser's default 1em margin before Preflight.
-export const pageLeadClassName = 'my-3.5 text-14 leading-[1.6] text-text-secondary'

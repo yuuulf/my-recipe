@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { AppShell } from '../components/Layout/AppShell'
-import { eyebrowClassName, iconButtonClassName, pageHeaderClassName, pageLeadClassName, pageTitleClassName } from '../components/styles'
+import { iconButtonClassName, pageHeaderClassName, pageTitleClassName } from '../components/styles'
 import { getMemberDisplayName, useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import type { GroupMember } from '../types/database'
@@ -105,9 +105,7 @@ export function SettingsPage() {
     <AppShell>
       <div className={`${pageHeaderClassName} mb-6.75 md:mb-7`}>
         <div>
-          <span className={eyebrowClassName}>設定</span>
           <h1 className={pageTitleClassName}>レシピノートの設定</h1>
-          <p className={pageLeadClassName}>レシピノートを一緒に使うメンバーを管理します。</p>
         </div>
       </div>
 

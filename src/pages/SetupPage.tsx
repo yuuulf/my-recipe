@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { PageLoader } from '../components/Loading'
-import { alertErrorClassName, backLinkClassName, eyebrowClassName, fieldLabelClassName, textInputClassName } from '../components/styles'
+import { alertErrorClassName, backLinkClassName, fieldLabelClassName, textInputClassName } from '../components/styles'
 import { useApp } from '../contexts/app-context'
 import { getErrorMessage } from '../lib/errors'
 import { RECIPE_NOTE_NAME_MAX } from '../features/groups/recipeNoteLimits'
@@ -51,8 +51,7 @@ export function SetupPage() {
       <div className="relative z-1 w-[min(470px,100%)] rounded-lg border border-border bg-white/96 px-5.5 py-7.5 shadow-md sm:p-10.5">
         {hasNotes ? <Link to="/recipes" className={`${backLinkClassName} mb-5`}><ArrowLeft size={17} /> 戻る</Link> : null}
         <div className="mb-5.75 grid size-12.25 place-items-center rounded-md bg-primary-soft text-primary"><BookOpen size={25} /></div>
-        {hasNotes ? null : <span className={eyebrowClassName}>ONE LAST STEP</span>}
-        <h1 className="mt-3 mb-2.5 text-26 font-bold tracking-[-.045em] text-text sm:text-30">{hasNotes ? '新しいレシピノートを作る' : 'レシピノートをつくりましょう'}</h1>
+        <h1 className="mb-2.5 text-26 font-bold tracking-[-.045em] text-text sm:text-30">{hasNotes ? '新しいレシピノートを作る' : 'レシピノートをつくりましょう'}</h1>
         <p className="mb-6.5 text-14 leading-[1.85] text-text-secondary">{hasNotes ? '新しいレシピノートに名前をつけます。作ったレシピノートが開きます。' : '家族や友人と共有するレシピノートに名前をつけます。'}</p>
         <form onSubmit={(event) => void handleSubmit(event)}>
           <label className={fieldLabelClassName} htmlFor="group-name">レシピノートの名前</label>

@@ -21,7 +21,7 @@ const setup = (props: { defaultValues?: RecipeFormValues, disableSave?: boolean,
   const onSubmit = vi.fn(props.onSubmit ?? (async () => {}))
   const { container } = render(
     <MemoryRouter>
-      <RecipeForm submitLabel="レシピを保存" defaultValues={props.defaultValues} disableSave={props.disableSave} onSubmit={onSubmit} />
+      <RecipeForm title="レシピを追加" submitLabel="レシピを保存" defaultValues={props.defaultValues} disableSave={props.disableSave} onSubmit={onSubmit} />
     </MemoryRouter>,
   )
   const field = (name: string) => container.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`)!
@@ -31,6 +31,13 @@ const setup = (props: { defaultValues?: RecipeFormValues, disableSave?: boolean,
 }
 
 describe('RecipeForm', () => {
+  it('has the page heading for screen readers only', () => {
+    setup()
+    const heading = screen.getByRole('heading', { level: 1, name: 'レシピを追加' })
+    expect(heading).toHaveClass('sr-only')
+    expect(screen.queryByText('料理の記録を残す')).not.toBeInTheDocument()
+  })
+
   it('does not save without a title and shows the error', async () => {
     const { user, onSubmit, saveButtons } = setup()
     await user.click(saveButtons()[0])
