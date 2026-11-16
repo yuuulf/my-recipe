@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom'
 import { LegalPage } from '../components/LegalPage'
-
-const CONTACT_EMAIL = 'urawo05@gmail.com'
+import { CONTACT_FORM_URL } from '../lib/contact'
 
 export function TermsPage() {
   return (
-    <LegalPage title="利用規約" updatedAt="2026年11月9日">
+    <LegalPage title="利用規約" updatedAt="2026年11月16日">
       <p>この利用規約は、My Recipe 運営者（以下「運営者」）が提供するレシピノートアプリ「My Recipe」（以下「本サービス」）の利用条件を定めます。利用者は、本規約に同意したうえで本サービスを利用するものとします。</p>
 
       <h2>1. 本サービスの内容</h2>
@@ -39,7 +38,7 @@ export function TermsPage() {
       <p>利用者の情報は、<Link to="/privacy">プライバシーポリシー</Link>に従って取り扱います。</p>
 
       <h2>9. 問い合わせ先</h2>
-      <p>My Recipe 運営者<br />メール: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+      <p>My Recipe 運営者<br /><a href={CONTACT_FORM_URL} target="_blank" rel="noopener noreferrer">問い合わせフォーム</a></p>
     </LegalPage>
   )
 }
